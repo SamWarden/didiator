@@ -1,3 +1,5 @@
+from typing import Awaitable, Callable, Protocol, TypeVar
+
 import pytest
 
 from didiator.implementation.command import Command, CommandDispatcherImpl, CommandHandler
@@ -47,6 +49,22 @@ class UpdateUserHandler(CommandHandler[UpdateUserCommand, None]):
         return None
 
 
+CR = TypeVar("CR")
+
+
+class CommandResult(Protocol):
+    pass
+
+
+C = TypeVar("C", bound=Command[CommandResult])
+
+
+class MockMiddleware:
+    # def __init__(self, ):
+    async def __call__(self, handler: Callable[[C, ...], Awaitable[CR]], command: C, *args, **kwargs) -> CR:
+        return await handler(command, *args, **kwargs)
+
+
 class TestCommandDispatcher:
     @pytest.mark.asyncio
     async def test_init(self) -> None:
@@ -66,3 +84,13 @@ class TestCommandDispatcher:
 
         command_dispatcher.register_handler(CreateUserCommand, ExtendedCreateUserHandler)
         assert command_dispatcher.handlers == {CreateUserCommand: ExtendedCreateUserHandler, UpdateUserCommand: UpdateUserHandler}
+
+    @pytest.mark.asyncio
+    async def test_initialization_with_middlewares(self) -> None:
+        middleware1 = MockMiddleware()
+        command_dispatcher = CommandDispatcherImpl(middlewares=(middleware1,))
+        assert command_dispatcher.middlewares == (middleware1,)
+
+        middleware2 = MockMiddleware()
+        command_dispatcher = CommandDispatcherImpl(middlewares=[middleware1, middleware2])
+        assert command_dispatcher.middlewares == (middleware1, middleware2)
