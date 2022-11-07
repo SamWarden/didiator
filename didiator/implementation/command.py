@@ -1,5 +1,6 @@
 import abc
-from typing import Callable, Generic, Type, TypeVar
+from collections.abc import Awaitable, Sequence, Callable
+from typing import Generic, Type, TypeVar
 
 CR = TypeVar("CR")
 
@@ -17,13 +18,13 @@ class CommandHandler(abc.ABC, Generic[C, CR]):
         ...
 
 
-Middleware = Callable
+Middleware = Callable[[Callable[[C, ...], Awaitable[CR]], C], CR]
 
 
 class CommandDispatcherImpl:
-    def __init__(self) -> None:
+    def __init__(self, middlewares: Sequence[Middleware] = ()) -> None:
         self._handlers: dict[Type[Command], Type[CommandHandler]] = {}
-        self._middlewares: list[Middleware] = []
+        self._middlewares: Sequence[Middleware] = middlewares
 
     def register_handler(self, command: Type[C], handler: Type[CommandHandler[C, CR]]) -> None:
         self._handlers[command] = handler
