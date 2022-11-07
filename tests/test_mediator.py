@@ -100,14 +100,14 @@ async def test_mediator() -> None:
     di_container.bind(bind_by_type(Dependent(UserRepoMock, scope="mediator"), UserRepo))
     di_container.bind(bind_by_type(Dependent(SessionMock, scope="mediator"), Session))
 
-    command_dispatcher = CommandDispatcher(middlewares=(LoggingMiddleware(), DiMiddleware(di_container, di_executor)))
-    query_dispatcher = QueryDispatcher(middlewares=(LoggingMiddleware(), DiMiddleware(di_container, di_executor)))
+    command_dispatcher = CommandDispatcherImpl(middlewares=(LoggingMiddleware(), DiMiddleware(di_container, di_executor)))
+    query_dispatcher = QueryDispatcherImpl(middlewares=(LoggingMiddleware(), DiMiddleware(di_container, di_executor)))
 
     command_dispatcher.register_handler(CreateUser, CreateUserHandler)
     query_dispatcher.register_handler(GetUserById, GetUserByIdHandler)
 
     async with di_container.enter_scope("mediator") as di_state:
-        mediator = Mediator(command_dispatcher, query_dispatcher, middleware_data={"di_state": di_state})
+        mediator = MediatorImpl(command_dispatcher, query_dispatcher, middleware_data={"di_state": di_state})
         # medator = initialized_mediator.bind({"di_state": di_state})
 
         assert await mediator.send(CreateUser(1, "Jon")) == 1
