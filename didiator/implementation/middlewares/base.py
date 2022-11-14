@@ -36,7 +36,7 @@ class Middleware:
         return await handler(command, *args, **kwargs)  # noqa: type
         # return await cast(
         #     handler,
-        #     Callable[[CommandHandler[CommandHandler[C, CR] | Type[CommandHandler[C, CR]] | "Middleware"], C, P], CR],
+        #     Callable[[HandlerType[C, CR] | "Middleware"], Awaitable[CR]],
         # )(command, *args, **kwargs)
 
 
