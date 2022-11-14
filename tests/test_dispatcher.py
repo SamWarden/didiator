@@ -27,15 +27,8 @@ class UserId(int):
 
 
 class CreateUserHandler(CommandHandler[CreateUserCommand, int]):
-    # def __init__(self, uow: UnitOfWork):
-    #     self._uow = uow
-    #
-
     async def __call__(self, command: CreateUserCommand) -> int:
         return command.user_id
-    #     user = User(command.user_id, command.username)
-    #     self._uow.user.add_user(user)
-    #     return user.user_id
 
 
 class ExtendedCreateUserHandler(CommandHandler[CreateUserCommand, UserId]):
@@ -44,12 +37,12 @@ class ExtendedCreateUserHandler(CommandHandler[CreateUserCommand, UserId]):
 
 
 class UpdateUserHandler(CommandHandler[UpdateUserCommand, str]):
-    # def __init__(self, uow: UnitOfWork):
-    #     self._uow = uow
-    #
-
-    async def __call__(self, command: int, additional_data: str = "") -> str:
+    async def __call__(self, command: UpdateUserCommand, additional_data: str = "") -> str:
         return additional_data
+
+
+async def handle_update_user(command: UpdateUserCommand, additional_data: str = "") -> str:
+    return additional_data
 
 
 class TestCommandDispatcher:
@@ -91,6 +84,23 @@ class TestCommandDispatcher:
         command_dispatcher = CommandDispatcherImpl(middlewares=[middleware1, middleware2])
 
         command_dispatcher.register_handler(UpdateUserCommand, UpdateUserHandler)
+
+        res = await command_dispatcher.send(UpdateUserCommand(1, "Sam"))
+        assert res == "value"
+
+    async def test_command_sending_with_function_handler(self) -> None:
+        command_dispatcher = CommandDispatcherImpl()
+        command_dispatcher.register_handler(UpdateUserCommand, handle_update_user)
+
+        res = await command_dispatcher.send(UpdateUserCommand(1, "Sam"), additional_data="value")
+        assert res == "value"
+
+    async def test_command_sending_with_middlewares_and_function_handler(self) -> None:
+        middleware1 = DataAdderMiddlewareMock(middleware_data="data", additional_data="value")
+        middleware2 = DataRemoverMiddlewareMock("middleware_data")
+        command_dispatcher = CommandDispatcherImpl(middlewares=[middleware1, middleware2])
+
+        command_dispatcher.register_handler(UpdateUserCommand, handle_update_user)
 
         res = await command_dispatcher.send(UpdateUserCommand(1, "Sam"))
         assert res == "value"
