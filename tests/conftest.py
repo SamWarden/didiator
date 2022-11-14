@@ -1,6 +1,6 @@
 import pytest
 
-from didiator.implementation.command import CommandDispatcherImpl
+from didiator.implementation.dispatcher import CommandDispatcherImpl
 
 
 @pytest.fixture()
