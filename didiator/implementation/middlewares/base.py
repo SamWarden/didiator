@@ -1,13 +1,11 @@
-from collections.abc import Awaitable, Callable
-from typing import cast, ParamSpec, Type, TypeVar
+from typing import ParamSpec, TypeVar
 
-from didiator.implementation.command import Command, CommandHandler
+from didiator.command import Command, CommandHandler
+from didiator.interface.dispatcher import HandlerType
 
 CR = TypeVar("CR")
 C = TypeVar("C", bound=Command)
 P = ParamSpec("P")
-
-HandlerType = Callable[[C], Awaitable[CR]] | Type[CommandHandler[C, CR]]
 
 
 class Middleware:

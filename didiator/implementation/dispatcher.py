@@ -1,18 +1,14 @@
 import functools
 from typing import Any, Awaitable, Callable, ParamSpec, Sequence, Type, TypeVar
 
-from didiator.implementation.command import Command, CommandHandler
-from didiator.implementation.middlewares.base import HandlerType, Middleware
+from didiator.command import Command
+from didiator.implementation.middlewares.base import Middleware
+from didiator.interface.dispatcher import MiddlewareType, HandlerType
 
 CR = TypeVar("CR")
 C = TypeVar("C", bound=Command[Any])
 P = ParamSpec("P")
 
-# MiddlewareType = Callable[[HandlerType | "MiddlewareType", C], Awaitable[CR]]
-MiddlewareType = Callable[[HandlerType[C, CR], C], Awaitable[CR]]
-# MiddlewareType = Callable[[Callable[..., Awaitable[CR]], C], CR]
-
-x: MiddlewareType[Command[int], str]
 
 DEFAULT_MIDDLEWARES: tuple[MiddlewareType, ...] = (Middleware(),)
 
