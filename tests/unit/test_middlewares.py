@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from functools import partial
 
-from didiator.implementation.command import Command, CommandHandler
-from didiator.implementation.middlewares.base import Middleware
+from didiator.command import Command, CommandHandler
+from didiator.middlewares.base import Middleware
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
 
