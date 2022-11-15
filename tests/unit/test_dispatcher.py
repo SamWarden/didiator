@@ -46,7 +46,7 @@ async def handle_update_user(command: UpdateUserCommand, additional_data: str = 
 
 
 class TestCommandDispatcher:
-    async def test_init(self) -> None:
+    def test_init(self) -> None:
         command_dispatcher: CommandDispatcherImpl = CommandDispatcherImpl()
 
         assert isinstance(command_dispatcher, CommandDispatcherImpl)
