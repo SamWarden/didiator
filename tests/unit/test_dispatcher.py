@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from didiator.command import Command, CommandHandler
 
-from didiator.implementation.dispatcher import CommandDispatcherImpl
+from didiator.dispatcher import CommandDispatcherImpl
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
 

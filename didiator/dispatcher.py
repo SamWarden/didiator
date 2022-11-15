@@ -2,7 +2,7 @@ import functools
 from typing import Any, Awaitable, Callable, ParamSpec, Sequence, Type, TypeVar
 
 from didiator.command import Command
-from didiator.implementation.middlewares.base import Middleware
+from didiator.middlewares.base import Middleware
 from didiator.interface.dispatcher import MiddlewareType, HandlerType
 
 CR = TypeVar("CR")

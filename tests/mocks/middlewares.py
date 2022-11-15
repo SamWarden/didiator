@@ -2,7 +2,7 @@ from collections.abc import Awaitable, Callable
 from typing import ParamSpec, Type, TypeVar
 
 from didiator.command import Command, CommandHandler
-from didiator.implementation.middlewares.base import Middleware
+from didiator.middlewares.base import Middleware
 
 CR = TypeVar("CR")
 C = TypeVar("C", bound=Command)
