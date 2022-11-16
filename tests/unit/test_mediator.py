@@ -4,6 +4,7 @@ from didiator.command import Command, RequestHandler
 from didiator.command_dispatcher import CommandDispatcherImpl
 from didiator.interface.mediator import CommandMediator, Mediator
 from didiator.mediator import MediatorImpl
+from didiator.query_dispatcher import QueryDispatcherImpl
 from tests.mocks.middlewares import DataRemoverMiddlewareMock
 
 
@@ -31,6 +32,7 @@ class TestMediator:
         mediator: Mediator = MediatorImpl()
 
         assert isinstance(mediator, MediatorImpl)
+        assert isinstance(MediatorImpl(CommandDispatcherImpl(), QueryDispatcherImpl()), MediatorImpl)
         assert isinstance(MediatorImpl(CommandDispatcherImpl()), MediatorImpl)
         assert isinstance(MediatorImpl(command_dispatcher=CommandDispatcherImpl()), MediatorImpl)
 

@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 
+import pytest
+
 from didiator.command import Command, RequestHandler
 
 from didiator.command_dispatcher import CommandDispatcherImpl
+from didiator.interface.exceptions import CommandHandlerNotFound
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
 
@@ -77,6 +80,12 @@ class TestCommandDispatcher:
 
         res = await command_dispatcher.send(CreateUserCommand(1, "Jon"))
         assert res == 1
+
+    async def test_sending_not_registered_command(self, command_dispatcher: CommandDispatcherImpl) -> None:
+        command_dispatcher.register_handler(CreateUserCommand, CreateUserHandler)
+
+        with pytest.raises(CommandHandlerNotFound):
+            await command_dispatcher.send(UpdateUserCommand(1, "Jon"))
 
     async def test_command_sending_with_middlewares(self) -> None:
         middleware1 = DataAdderMiddlewareMock(middleware_data="data", additional_data="value")
