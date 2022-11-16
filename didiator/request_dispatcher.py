@@ -7,7 +7,7 @@ from didiator.request import Request
 from didiator.middlewares.base import Middleware
 from didiator.interface.dispatcher import Dispatcher, MiddlewareType, HandlerType
 
-RES = TypeVar("RES")
+RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
 
 DEFAULT_MIDDLEWARES: tuple[MiddlewareType, ...] = (Middleware(),)
@@ -18,7 +18,7 @@ class RequestDispatcherImpl(Dispatcher, abc.ABC):
         self._handlers: dict[Type[Request[Any]], HandlerType[Any, Any]] = {}
         self._middlewares: Sequence[MiddlewareType] = middlewares
 
-    def _register_handler(self, request: Type[R], handler: HandlerType[R, RES]) -> None:
+    def _register_handler(self, request: Type[R], handler: HandlerType[R, RRes]) -> None:
         self._handlers[request] = handler
 
     @property
@@ -29,7 +29,7 @@ class RequestDispatcherImpl(Dispatcher, abc.ABC):
     def middlewares(self) -> tuple[MiddlewareType, ...]:
         return tuple(self._middlewares)
 
-    async def _handle(self, request: Request[RES], *args: Any, **kwargs: Any) -> RES:
+    async def _handle(self, request: Request[RRes], *args: Any, **kwargs: Any) -> RRes:
         try:
             handler = self._handlers[type(request)]
         except KeyError:
@@ -37,14 +37,14 @@ class RequestDispatcherImpl(Dispatcher, abc.ABC):
 
         # Handler has to be wrapped with at least one middleware to initialize the handler if it is necessary
         middlewares = self._middlewares if self._middlewares else DEFAULT_MIDDLEWARES
-        wrapped_handler: Callable[..., Awaitable[RES]] = self._wrap_middleware(middlewares, handler)
+        wrapped_handler: Callable[..., Awaitable[RRes]] = self._wrap_middleware(middlewares, handler)
         return await wrapped_handler(request, *args, **kwargs)
 
     @staticmethod
     def _wrap_middleware(
-        middlewares: Sequence[MiddlewareType[R, RES]],
-        handler: HandlerType[R, RES],
-    ) -> Callable[..., Awaitable[RES]]:
+        middlewares: Sequence[MiddlewareType[R, RRes]],
+        handler: HandlerType[R, RRes],
+    ) -> Callable[..., Awaitable[RRes]]:
         for middleware in reversed(middlewares):
             handler = functools.partial(middleware, handler)
 

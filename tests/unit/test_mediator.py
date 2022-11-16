@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from didiator.command import Command, CommandHandler
+from didiator.command import Command, Handler
 from didiator.command_dispatcher import CommandDispatcherImpl
 from didiator.interface.mediator import CommandMediator, Mediator, QueryMediator
 from didiator.mediator import MediatorImpl
@@ -19,7 +19,7 @@ class QueryMock(Query[str]):
     result: str
 
 
-class CommandHandlerMock(CommandHandler[CommandMock, str]):
+class CommandHandlerMock(Handler[CommandMock, str]):
     def __init__(self, *args, **kwargs):
         self._excluded_args = args
         self._expected_kwargs = kwargs

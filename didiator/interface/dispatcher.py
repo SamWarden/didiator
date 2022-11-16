@@ -1,15 +1,15 @@
 from typing import Any, Awaitable, Callable, ParamSpec, Protocol, Type, TypeVar
 
-from didiator.request import Request, CommandHandler
+from didiator.request import Request, Handler
 
-RES = TypeVar("RES")
+RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
 P = ParamSpec("P")
 
-HandlerType = Callable[[R], Awaitable[RES]] | Type[CommandHandler[R, RES]]
+HandlerType = Callable[[R], Awaitable[RRes]] | Type[Handler[R, RRes]]
 
 # MiddlewareType = Callable[[HandlerType | "MiddlewareType", C], Awaitable[CR]]
-MiddlewareType = Callable[[HandlerType[R, RES], R], Awaitable[RES]]
+MiddlewareType = Callable[[HandlerType[R, RRes], R], Awaitable[RRes]]
 # MiddlewareType = Callable[[Callable[..., Awaitable[CR]], C], CR]
 
 # x: MiddlewareType[Command[int], str]

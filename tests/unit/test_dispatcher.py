@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import pytest
 
-from didiator.command import Command, CommandHandler
+from didiator.command import Command, Handler
 
 from didiator.command_dispatcher import CommandDispatcherImpl
 from didiator.interface.exceptions import CommandHandlerNotFound
@@ -29,17 +29,17 @@ class UserId(int):
     pass
 
 
-class CreateUserHandler(CommandHandler[CreateUserCommand, int]):
+class CreateUserHandler(Handler[CreateUserCommand, int]):
     async def __call__(self, command: CreateUserCommand) -> int:
         return command.user_id
 
 
-class ExtendedCreateUserHandler(CommandHandler[CreateUserCommand, UserId]):
+class ExtendedCreateUserHandler(Handler[CreateUserCommand, UserId]):
     async def __call__(self, command: CreateUserCommand) -> UserId:
         return UserId(command.user_id)
 
 
-class UpdateUserHandler(CommandHandler[UpdateUserCommand, str]):
+class UpdateUserHandler(Handler[UpdateUserCommand, str]):
     async def __call__(self, command: UpdateUserCommand, additional_data: str = "") -> str:
         return additional_data
 

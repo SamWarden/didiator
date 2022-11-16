@@ -8,7 +8,8 @@ from didiator.interface.query_dispatcher import QueryDispatcher
 from didiator.query import Query
 from didiator.query_dispatcher import QueryDispatcherImpl
 
-RES = TypeVar("RES")
+CRes = TypeVar("CRes")
+QRes = TypeVar("QRes")
 
 
 class MediatorImpl(Mediator):
@@ -38,8 +39,8 @@ class MediatorImpl(Mediator):
         extra_data = {key: val for key, val in self._extra_data.items() if key not in keys}
         return MediatorImpl(self._command_dispatcher, self._query_dispatcher, extra_data=extra_data)
 
-    async def send(self, command: Command[RES], *args: Any, **kwargs: Any) -> RES:
+    async def send(self, command: Command[CRes], *args: Any, **kwargs: Any) -> CRes:
         return await self._command_dispatcher.send(command, *args, **kwargs, **self._extra_data)
 
-    async def query(self, query: Query[RES], *args: Any, **kwargs: Any) -> RES:
+    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> QRes:
         return await self._query_dispatcher.query(query, *args, **kwargs, **self._extra_data)

@@ -26,7 +26,7 @@ class CommandMediator(BaseMediator, Protocol):
 
 
 class QueryMediator(BaseMediator, Protocol):
-    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> CRes:
+    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> QRes:
         raise NotImplementedError
 
 

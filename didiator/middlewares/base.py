@@ -1,34 +1,31 @@
 from typing import Any, TypeVar
 
-from didiator.request import Request, CommandHandler
-from didiator.interface.command_dispatcher import HandlerType
+from didiator.interface.dispatcher import HandlerType
+from didiator.request import Request, Handler
 
-RES = TypeVar("RES")
+RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request)
 
 
 class Middleware:
     async def __call__(
         self,
-        handler: HandlerType[R, RES],
+        handler: HandlerType[R, RRes],
         request: R,
         *args: Any,
         **kwargs: Any,
-    ) -> RES:
+    ) -> RRes:
         return await self._call(handler, request, *args, **kwargs)
 
     async def _call(
         self,
-        handler: HandlerType[R, RES],
+        handler: HandlerType[R, RRes],
         request: R,
         *args: Any,
         **kwargs: Any,
-    ) -> RES:
-        try:
-            if issubclass(handler, CommandHandler):
-                handler = handler()
-        except TypeError:
-            pass
+    ) -> RRes:
+        if isinstance(handler, type) and issubclass(handler, Handler):
+            handler = handler()
 
         return await handler(request, *args, **kwargs)  # noqa: type
         # return await cast(
