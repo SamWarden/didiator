@@ -16,8 +16,13 @@ MiddlewareType = Callable[[HandlerType[C, CR], C], Awaitable[CR]]
 
 
 class CommandDispatcher(Protocol):
-    handlers: dict[Type[Command[Any]], HandlerType[Any, Any]]
-    middlewares: tuple[MiddlewareType[Any, Any], ...]
+    @property
+    def handlers(self) -> dict[Type[Command[Any]], HandlerType[Any, Any]]:
+        raise NotImplementedError
+
+    @property
+    def middlewares(self) -> tuple[MiddlewareType[Any, Any], ...]:
+        raise NotImplementedError
 
     def register_handler(self, command: Type[C], handler: HandlerType[C, CR]) -> None:
         raise NotImplementedError
