@@ -1,8 +1,8 @@
 from typing import Any, ParamSpec, TypeVar
 
 from didiator.command import Command
-from didiator.dispatcher import CommandDispatcherImpl
-from didiator.interface.dispatcher import CommandDispatcher
+from didiator.command_dispatcher import CommandDispatcherImpl
+from didiator.interface.command_dispatcher import CommandDispatcher
 from didiator.interface.mediator import Mediator
 
 CR = TypeVar("CR")

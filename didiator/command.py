@@ -1,17 +1,19 @@
 import abc
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
-CR = TypeVar("CR")
+from didiator.request import Request, RequestHandler
+
+CRES = TypeVar("CRES")
 
 
-class Command(abc.ABC, Generic[CR]):
+class Command(Request[CRES], abc.ABC, Generic[CRES]):
     pass
 
 
-C = TypeVar("C", bound=Command)
+C = TypeVar("C", bound=Command[Any])
 
 
-class CommandHandler(abc.ABC, Generic[C, CR]):
+class CommandHandler(RequestHandler[C, CRES], abc.ABC, Generic[C, CRES]):
     @abc.abstractmethod
-    async def __call__(self, command: C) -> CR:
+    async def __call__(self, command: C) -> CRES:
         ...
