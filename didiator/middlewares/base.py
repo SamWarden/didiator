@@ -2,6 +2,7 @@ from typing import ParamSpec, TypeVar
 
 from didiator.command import Command, CommandHandler
 from didiator.interface.dispatcher import HandlerType
+from didiator.query import QueryHandler
 
 CR = TypeVar("CR")
 C = TypeVar("C", bound=Command)
@@ -26,7 +27,7 @@ class Middleware:
         **kwargs: P.kwargs,
     ) -> CR:
         try:
-            if issubclass(handler, CommandHandler):
+            if issubclass(handler, (CommandHandler, QueryHandler)):
                 handler = handler()
         except TypeError:
             pass
