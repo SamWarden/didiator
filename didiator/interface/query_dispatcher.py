@@ -3,10 +3,10 @@ from typing import Any, Protocol, Type, TypeVar
 from didiator.interface.dispatcher import Dispatcher, HandlerType
 from didiator.query import Query
 
-QRES = TypeVar("QRES")
+QRes = TypeVar("QRes")
 Q = TypeVar("Q", bound=Query[Any])
 
-# HandlerType = Callable[[Q], Awaitable[QRES]] | Type[RequestHandler[Q, QRES]]
+# HandlerType = Callable[[Q], Awaitable[QRes]] | Type[RequestHandler[Q, QRes]]
 
 
 class QueryDispatcher(Dispatcher, Protocol):
@@ -14,8 +14,8 @@ class QueryDispatcher(Dispatcher, Protocol):
     def handlers(self) -> dict[Type[Query[Any]], HandlerType[Any, Any]]:
         raise NotImplementedError
 
-    def register_handler(self, query: Type[Q], handler: HandlerType[Q, QRES]) -> None:
+    def register_handler(self, query: Type[Q], handler: HandlerType[Q, QRes]) -> None:
         raise NotImplementedError
 
-    async def query(self, query: Query[QRES], *args: Any, **kwargs: Any) -> QRES:
+    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> QRes:
         raise NotImplementedError

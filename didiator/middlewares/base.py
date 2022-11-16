@@ -1,6 +1,6 @@
 from typing import Any, TypeVar
 
-from didiator.request import Request, RequestHandler
+from didiator.request import Request, CommandHandler
 from didiator.interface.command_dispatcher import HandlerType
 
 RES = TypeVar("RES")
@@ -25,7 +25,7 @@ class Middleware:
         **kwargs: Any,
     ) -> RES:
         try:
-            if issubclass(handler, RequestHandler):
+            if issubclass(handler, CommandHandler):
                 handler = handler()
         except TypeError:
             pass
