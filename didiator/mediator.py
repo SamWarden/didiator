@@ -1,24 +1,30 @@
-from typing import Any, ParamSpec, TypeVar
+from typing import Any, TypeVar
 
 from didiator.command import Command
 from didiator.command_dispatcher import CommandDispatcherImpl
 from didiator.interface.command_dispatcher import CommandDispatcher
 from didiator.interface.mediator import Mediator
+from didiator.interface.query_dispatcher import QueryDispatcher
+from didiator.query import Query
+from didiator.query_dispatcher import QueryDispatcherImpl
 
-CR = TypeVar("CR")
-C = TypeVar("C", bound=Command[Any])
-P = ParamSpec("P")
+RES = TypeVar("RES")
 
 
 class MediatorImpl(Mediator):
     def __init__(
-        self, command_dispatcher: CommandDispatcher | None = None,
+        self,
+        command_dispatcher: CommandDispatcher | None = None,
+        query_dispatcher: QueryDispatcher | None = None,
         *, extra_data: dict[str, Any] | None = None,
     ):
         if command_dispatcher is None:
             command_dispatcher = CommandDispatcherImpl()
+        if query_dispatcher is None:
+            query_dispatcher = QueryDispatcherImpl()
 
         self._command_dispatcher = command_dispatcher
+        self._query_dispatcher = query_dispatcher
         self._extra_data = extra_data if extra_data is not None else {}
 
     @property
@@ -26,11 +32,14 @@ class MediatorImpl(Mediator):
         return self._extra_data
 
     def bind(self, **extra_data: Any) -> "MediatorImpl":
-        return MediatorImpl(self._command_dispatcher, extra_data=self._extra_data | extra_data)
+        return MediatorImpl(self._command_dispatcher, self._query_dispatcher, extra_data=self._extra_data | extra_data)
 
     def unbind(self, *keys: str) -> "MediatorImpl":
         extra_data = {key: val for key, val in self._extra_data.items() if key not in keys}
-        return MediatorImpl(self._command_dispatcher, extra_data=extra_data)
+        return MediatorImpl(self._command_dispatcher, self._query_dispatcher, extra_data=extra_data)
 
-    async def send(self, command: Command[CR], *args: P.args, **kwargs: P.kwargs) -> CR:
+    async def send(self, command: Command[RES], *args: Any, **kwargs: Any) -> RES:
         return await self._command_dispatcher.send(command, *args, **kwargs, **self._extra_data)
+
+    async def query(self, query: Query[RES], *args: Any, **kwargs: Any) -> RES:
+        return await self._query_dispatcher.query(query, *args, **kwargs, **self._extra_data)

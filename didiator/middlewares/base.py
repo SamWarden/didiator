@@ -1,29 +1,28 @@
-from typing import ParamSpec, TypeVar
+from typing import Any, TypeVar
 
 from didiator.request import Request, RequestHandler
 from didiator.interface.command_dispatcher import HandlerType
 
 RES = TypeVar("RES")
 R = TypeVar("R", bound=Request)
-P = ParamSpec("P")
 
 
 class Middleware:
     async def __call__(
         self,
-        handler: HandlerType,
+        handler: HandlerType[R, RES],
         request: R,
-        *args: P.args,
-        **kwargs: P.kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> RES:
         return await self._call(handler, request, *args, **kwargs)
 
     async def _call(
         self,
-        handler: HandlerType,
+        handler: HandlerType[R, RES],
         request: R,
-        *args: P.args,
-        **kwargs: P.kwargs,
+        *args: Any,
+        **kwargs: Any,
     ) -> RES:
         try:
             if issubclass(handler, RequestHandler):

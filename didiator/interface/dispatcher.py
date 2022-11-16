@@ -23,6 +23,3 @@ class Dispatcher(Protocol):
     @property
     def middlewares(self) -> tuple[MiddlewareType[Any, Any], ...]:
         raise NotImplementedError
-
-    def register_handler(self, request: Type[R], handler: HandlerType[R, RES]) -> None:
-        raise NotImplementedError
