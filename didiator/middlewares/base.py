@@ -1,11 +1,10 @@
 from typing import ParamSpec, TypeVar
 
-from didiator.command import Command, CommandHandler
-from didiator.interface.dispatcher import HandlerType
-from didiator.query import QueryHandler
+from didiator.request import Request, RequestHandler
+from didiator.interface.command_dispatcher import HandlerType
 
-CR = TypeVar("CR")
-C = TypeVar("C", bound=Command)
+RES = TypeVar("RES")
+R = TypeVar("R", bound=Request)
 P = ParamSpec("P")
 
 
@@ -13,26 +12,26 @@ class Middleware:
     async def __call__(
         self,
         handler: HandlerType,
-        command: C,
+        request: R,
         *args: P.args,
         **kwargs: P.kwargs,
-    ) -> CR:
-        return await self._call(handler, command, *args, **kwargs)
+    ) -> RES:
+        return await self._call(handler, request, *args, **kwargs)
 
     async def _call(
         self,
         handler: HandlerType,
-        command: C,
+        request: R,
         *args: P.args,
         **kwargs: P.kwargs,
-    ) -> CR:
+    ) -> RES:
         try:
-            if issubclass(handler, (CommandHandler, QueryHandler)):
+            if issubclass(handler, RequestHandler):
                 handler = handler()
         except TypeError:
             pass
 
-        return await handler(command, *args, **kwargs)  # noqa: type
+        return await handler(request, *args, **kwargs)  # noqa: type
         # return await cast(
         #     handler,
         #     Callable[[HandlerType[C, CR] | "Middleware"], Awaitable[CR]],

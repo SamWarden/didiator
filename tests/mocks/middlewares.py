@@ -1,14 +1,14 @@
 from collections.abc import Awaitable, Callable
 from typing import ParamSpec, Type, TypeVar
 
-from didiator.command import Command, CommandHandler
+from didiator.command import Command, RequestHandler
 from didiator.middlewares.base import Middleware
 
 CR = TypeVar("CR")
 C = TypeVar("C", bound=Command)
 P = ParamSpec("P")
 
-HandlerType = Callable[[C], Awaitable[CR]] | Type[CommandHandler[C, CR]]
+HandlerType = Callable[[C], Awaitable[CR]] | Type[RequestHandler[C, CR]]
 
 
 class DataAdderMiddlewareMock(Middleware):

@@ -1,6 +1,6 @@
 import pytest
 
-from didiator.dispatcher import CommandDispatcherImpl
+from didiator.command_dispatcher import CommandDispatcherImpl
 from didiator.query_dispatcher import QueryDispatcherImpl
 
 

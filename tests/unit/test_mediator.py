@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from didiator.command import Command, CommandHandler
-from didiator.dispatcher import CommandDispatcherImpl
+from didiator.command import Command, RequestHandler
+from didiator.command_dispatcher import CommandDispatcherImpl
 from didiator.interface.mediator import CommandMediator, Mediator
 from didiator.mediator import MediatorImpl
 from tests.mocks.middlewares import DataRemoverMiddlewareMock
@@ -12,7 +12,7 @@ class CommandMock(Command[str]):
     result: str
 
 
-class HandlerMock(CommandHandler[CommandMock, str]):
+class HandlerMock(RequestHandler[CommandMock, str]):
     def __init__(self, *args, **kwargs):
         self._excluded_args = args
         self._expected_kwargs = kwargs

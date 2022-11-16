@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
-from didiator.command import Command, CommandHandler
+from didiator.command import Command, RequestHandler
 
-from didiator.dispatcher import CommandDispatcherImpl
+from didiator.command_dispatcher import CommandDispatcherImpl
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
 
@@ -26,17 +26,17 @@ class UserId(int):
     pass
 
 
-class CreateUserHandler(CommandHandler[CreateUserCommand, int]):
+class CreateUserHandler(RequestHandler[CreateUserCommand, int]):
     async def __call__(self, command: CreateUserCommand) -> int:
         return command.user_id
 
 
-class ExtendedCreateUserHandler(CommandHandler[CreateUserCommand, UserId]):
+class ExtendedCreateUserHandler(RequestHandler[CreateUserCommand, UserId]):
     async def __call__(self, command: CreateUserCommand) -> UserId:
         return UserId(command.user_id)
 
 
-class UpdateUserHandler(CommandHandler[UpdateUserCommand, str]):
+class UpdateUserHandler(RequestHandler[UpdateUserCommand, str]):
     async def __call__(self, command: UpdateUserCommand, additional_data: str = "") -> str:
         return additional_data
 

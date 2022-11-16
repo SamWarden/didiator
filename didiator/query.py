@@ -1,17 +1,19 @@
 import abc
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
-QR = TypeVar("QR")
+from didiator.request import Request, RequestHandler
+
+QRES = TypeVar("QRES")
 
 
-class Query(abc.ABC, Generic[QR]):
+class Query(Request[QRES], abc.ABC, Generic[QRES]):
     pass
 
 
-Q = TypeVar("Q", bound=Query)
+Q = TypeVar("Q", bound=Query[Any])
 
 
-class QueryHandler(abc.ABC, Generic[Q, QR]):
+class QueryHandler(RequestHandler[Q, QRES], abc.ABC, Generic[Q, QRES]):
     @abc.abstractmethod
-    async def __call__(self, query: Q) -> QR:
+    async def __call__(self, query: Q) -> QRES:
         ...
