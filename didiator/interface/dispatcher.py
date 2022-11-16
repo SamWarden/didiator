@@ -1,12 +1,12 @@
 from typing import Any, Awaitable, Callable, ParamSpec, Protocol, Type, TypeVar
 
-from didiator.request import Request, RequestHandler
+from didiator.request import Request, CommandHandler
 
 RES = TypeVar("RES")
 R = TypeVar("R", bound=Request[Any])
 P = ParamSpec("P")
 
-HandlerType = Callable[[R], Awaitable[RES]] | Type[RequestHandler[R, RES]]
+HandlerType = Callable[[R], Awaitable[RES]] | Type[CommandHandler[R, RES]]
 
 # MiddlewareType = Callable[[HandlerType | "MiddlewareType", C], Awaitable[CR]]
 MiddlewareType = Callable[[HandlerType[R, RES], R], Awaitable[RES]]
@@ -22,7 +22,4 @@ class Dispatcher(Protocol):
 
     @property
     def middlewares(self) -> tuple[MiddlewareType[Any, Any], ...]:
-        raise NotImplementedError
-
-    def register_handler(self, request: Type[R], handler: HandlerType[R, RES]) -> None:
         raise NotImplementedError

@@ -1,5 +1,8 @@
 from dataclasses import dataclass
 
+import pytest
+
+from didiator.interface.exceptions import QueryHandlerNotFound
 from didiator.query import Query, QueryHandler
 
 from didiator.query_dispatcher import QueryDispatcherImpl
@@ -77,6 +80,12 @@ class TestQueryDispatcher:
 
         res = await query_dispatcher.query(GetUserQuery(1, "Jon"))
         assert res == 1
+
+    async def test_querying_not_registered_query(self, query_dispatcher: QueryDispatcherImpl) -> None:
+        query_dispatcher.register_handler(GetUserQuery, GetUserHandler)
+
+        with pytest.raises(QueryHandlerNotFound):
+            await query_dispatcher.query(CollectUserDataQuery(1, "Jon"))
 
     async def test_query_querying_with_middlewares(self) -> None:
         middleware1 = DataAdderMiddlewareMock(middleware_data="data", additional_data="value")

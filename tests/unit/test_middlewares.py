@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from functools import partial
 
-from didiator.command import Command, RequestHandler
+from didiator.command import Command, CommandHandler
 from didiator.middlewares.base import Middleware
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
@@ -11,7 +11,7 @@ class CommandMock(Command[bool]):
     pass
 
 
-class HandlerMock(RequestHandler[CommandMock, bool]):
+class HandlerMock(CommandHandler[CommandMock, bool]):
     def __init__(self, *args, **kwargs):
         self._excluded_args = args
         self._expected_kwargs = kwargs

@@ -1,11 +1,11 @@
-from typing import Any, ParamSpec, Protocol, TypeVar
+from typing import Any, Protocol, TypeVar
 
 from didiator.command import Command
+from didiator.query import Query
 
 Self = TypeVar("Self", bound="BaseMediator")
-CR = TypeVar("CR")
-C = TypeVar("C", bound=Command[Any])
-P = ParamSpec("P")
+CRes = TypeVar("CRes")
+QRes = TypeVar("QRes")
 
 
 class BaseMediator(Protocol):
@@ -21,9 +21,14 @@ class BaseMediator(Protocol):
 
 
 class CommandMediator(BaseMediator, Protocol):
-    async def send(self, command: Command[CR], *args: P.args, **kwargs: P.kwargs) -> CR:
+    async def send(self, command: Command[CRes], *args: Any, **kwargs: Any) -> CRes:
         raise NotImplementedError
 
 
-class Mediator(BaseMediator, Protocol):
+class QueryMediator(BaseMediator, Protocol):
+    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> CRes:
+        raise NotImplementedError
+
+
+class Mediator(CommandMediator, QueryMediator, BaseMediator, Protocol):
     pass
