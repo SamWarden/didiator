@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from didiator.command import Command, CommandHandler
 from didiator.dispatcher import CommandDispatcherImpl
-from didiator.interface.mediator import Mediator
+from didiator.interface.mediator import CommandMediator, Mediator
 from didiator.mediator import MediatorImpl
 from tests.mocks.middlewares import DataRemoverMiddlewareMock
 
@@ -38,7 +38,7 @@ class TestMediator:
         command_dispatcher = CommandDispatcherImpl()
         command_dispatcher.register_handler(CommandMock, HandlerMock)
 
-        mediator = MediatorImpl(command_dispatcher)
+        mediator: CommandMediator = MediatorImpl(command_dispatcher)
 
         assert await mediator.send(CommandMock("data")) == "data"
 
