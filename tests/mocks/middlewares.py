@@ -1,13 +1,11 @@
-from collections.abc import Awaitable, Callable
-from typing import Any, ParamSpec, Type, TypeVar
+from typing import Any, TypeVar
 
+from didiator.interface.dispatchers.request import HandlerType
 from didiator.middlewares.base import Middleware
-from didiator.request import Request, Handler
+from didiator.interface.entities.request import Request
 
 RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
-
-HandlerType = Callable[[R], Awaitable[RRes]] | Type[Handler[R, RRes]]
 
 
 class DataAdderMiddlewareMock(Middleware):

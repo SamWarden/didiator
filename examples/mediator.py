@@ -5,7 +5,7 @@ from di.container import bind_by_type, Container
 from di.dependent import Dependent
 from di.executors import AsyncExecutor
 
-from didiator.command_dispatcher import CommandDispatcherImpl
+from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.mediator import MediatorImpl
 
 

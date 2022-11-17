@@ -1,15 +1,11 @@
 import abc
 from typing import Any, Generic, TypeVar
 
-from didiator.request import Request, Handler
+from didiator.interface.entities.command import Command
+
+from .request import Handler
 
 CRes = TypeVar("CRes")
-
-
-class Command(Request[CRes], abc.ABC, Generic[CRes]):
-    pass
-
-
 C = TypeVar("C", bound=Command[Any])
 
 

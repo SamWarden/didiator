@@ -1,8 +1,8 @@
 # from .command import Command, CommandHandler
-from .command_dispatcher import CommandDispatcher
-from .dispatcher import Dispatcher
+from didiator.interface.dispatchers.command import CommandDispatcher
+from didiator.interface.dispatchers.request import Dispatcher
 from .mediator import CommandMediator, Mediator, QueryMediator
-from .query_dispatcher import QueryDispatcher
+from didiator.interface.dispatchers.query import QueryDispatcher
 # from .query import Query, QueryHandler
 
 __all__ = (

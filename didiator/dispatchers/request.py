@@ -2,10 +2,10 @@ import abc
 import functools
 from typing import Any, Awaitable, Callable, Sequence, Type, TypeVar
 
+from didiator.interface.entities.request import Request
 from didiator.interface.exceptions import HandlerNotFound
-from didiator.request import Request
 from didiator.middlewares.base import Middleware
-from didiator.interface.dispatcher import Dispatcher, MiddlewareType, HandlerType
+from didiator.interface.dispatchers.request import Dispatcher, MiddlewareType, HandlerType
 
 RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])

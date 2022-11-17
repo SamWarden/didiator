@@ -1,12 +1,10 @@
-from typing import Any, Awaitable, Callable, ParamSpec, Protocol, Type, TypeVar
+from typing import Any, Awaitable, Callable, Protocol, Type, TypeVar
 
-from didiator.request import Request, Handler
+from didiator.interface.entities.request import Request
+from didiator.interface.handlers.request import HandlerType
 
-RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
-P = ParamSpec("P")
-
-HandlerType = Callable[[R], Awaitable[RRes]] | Type[Handler[R, RRes]]
+RRes = TypeVar("RRes")
 
 # MiddlewareType = Callable[[HandlerType | "MiddlewareType", C], Awaitable[CR]]
 MiddlewareType = Callable[[HandlerType[R, RRes], R], Awaitable[RRes]]

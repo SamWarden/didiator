@@ -2,9 +2,10 @@ from dataclasses import dataclass
 
 import pytest
 
-from didiator.command import Command, Handler
+from didiator.interface.handlers import CommandHandler
+from didiator.interface.entities.command import Command
 
-from didiator.command_dispatcher import CommandDispatcherImpl
+from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.exceptions import CommandHandlerNotFound
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
@@ -29,17 +30,17 @@ class UserId(int):
     pass
 
 
-class CreateUserHandler(Handler[CreateUserCommand, int]):
+class CreateUserHandler(CommandHandler[CreateUserCommand, int]):
     async def __call__(self, command: CreateUserCommand) -> int:
         return command.user_id
 
 
-class ExtendedCreateUserHandler(Handler[CreateUserCommand, UserId]):
+class ExtendedCreateUserHandler(CommandHandler[CreateUserCommand, UserId]):
     async def __call__(self, command: CreateUserCommand) -> UserId:
         return UserId(command.user_id)
 
 
-class UpdateUserHandler(Handler[UpdateUserCommand, str]):
+class UpdateUserHandler(CommandHandler[UpdateUserCommand, str]):
     async def __call__(self, command: UpdateUserCommand, additional_data: str = "") -> str:
         return additional_data
 

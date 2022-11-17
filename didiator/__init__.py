@@ -1,7 +1,8 @@
-from .command import Command, CommandHandler
+from .dispatchers import CommandDispatcherImpl, QueryDispatcherImpl
+from .interface.entities import Command, Query
+from .interface.handlers import CommandHandler, QueryHandler
 from .interface.mediator import Mediator
 from .mediator import MediatorImpl
-from .query import Query, QueryHandler
 
 __version__ = '0.1.0'
 
@@ -11,6 +12,8 @@ __all__ = (
     "Mediator",
     "Command",
     "CommandHandler",
+    "CommandDispatcherImpl",
     "Query",
     "QueryHandler",
+    "QueryDispatcherImpl",
 )

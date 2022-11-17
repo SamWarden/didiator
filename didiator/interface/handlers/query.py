@@ -1,15 +1,11 @@
 import abc
 from typing import Any, Generic, TypeVar
 
-from didiator.request import Request, Handler
+from didiator.interface.entities.query import Query
+
+from .request import Handler
 
 QRes = TypeVar("QRes")
-
-
-class Query(Request[QRes], abc.ABC, Generic[QRes]):
-    pass
-
-
 Q = TypeVar("Q", bound=Query[Any])
 
 

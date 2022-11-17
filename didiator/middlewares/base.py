@@ -1,7 +1,8 @@
 from typing import Any, TypeVar
 
-from didiator.interface.dispatcher import HandlerType
-from didiator.request import Request, Handler
+from didiator.interface.dispatchers.request import HandlerType
+from didiator.interface.entities.request import Request
+from didiator.interface.handlers.request import Handler
 
 RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request)

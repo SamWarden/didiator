@@ -1,10 +1,10 @@
 from typing import Any, Protocol, Type, TypeVar
 
-from didiator.interface.dispatcher import Dispatcher, HandlerType
-from didiator.query import Query
+from didiator.interface.dispatchers.request import Dispatcher, HandlerType
+from didiator.interface.entities.query import Query
 
-QRes = TypeVar("QRes")
 Q = TypeVar("Q", bound=Query[Any])
+QRes = TypeVar("QRes")
 
 # HandlerType = Callable[[Q], Awaitable[QRes]] | Type[RequestHandler[Q, QRes]]
 
