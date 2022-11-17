@@ -3,9 +3,10 @@ from dataclasses import dataclass
 import pytest
 
 from didiator.interface.exceptions import QueryHandlerNotFound
-from didiator.query import Query, QueryHandler
+from didiator.interface.entities.query import Query
+from didiator.interface.handlers import QueryHandler
 
-from didiator.query_dispatcher import QueryDispatcherImpl
+from didiator.dispatchers.query import QueryDispatcherImpl
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 
 

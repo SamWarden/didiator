@@ -2,9 +2,10 @@ from dataclasses import dataclass
 
 import pytest
 
-from didiator.command import Command, CommandHandler
+from didiator.interface.handlers import CommandHandler
+from didiator.interface.entities.command import Command
 
-from didiator.command_dispatcher import CommandDispatcherImpl
+from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.exceptions import CommandHandlerNotFound
 from tests.mocks.middlewares import DataAdderMiddlewareMock, DataRemoverMiddlewareMock
 

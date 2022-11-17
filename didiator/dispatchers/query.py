@@ -1,10 +1,10 @@
 from typing import Any, Type, TypeVar
 
-from didiator.interface.dispatcher import HandlerType
+from didiator.interface.handlers.request import HandlerType
+from didiator.interface.dispatchers.query import QueryDispatcher
+from didiator.interface.entities.query import Query
 from didiator.interface.exceptions import HandlerNotFound, QueryHandlerNotFound
-from didiator.interface.query_dispatcher import QueryDispatcher
-from didiator.query import Query
-from didiator.request_dispatcher import RequestDispatcherImpl
+from didiator.dispatchers.request import RequestDispatcherImpl
 
 QRes = TypeVar("QRes")
 Q = TypeVar("Q", bound=Query[Any])

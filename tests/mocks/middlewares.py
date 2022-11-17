@@ -1,13 +1,11 @@
-from collections.abc import Awaitable, Callable
-from typing import Any, ParamSpec, Type, TypeVar
+from typing import Any, TypeVar
 
+from didiator.interface.dispatchers.request import HandlerType
 from didiator.middlewares.base import Middleware
-from didiator.request import Request, CommandHandler
+from didiator.interface.entities.request import Request
 
-RES = TypeVar("RES")
+RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
-
-HandlerType = Callable[[R], Awaitable[RES]] | Type[CommandHandler[R, RES]]
 
 
 class DataAdderMiddlewareMock(Middleware):
@@ -16,11 +14,11 @@ class DataAdderMiddlewareMock(Middleware):
 
     async def __call__(
         self,
-        handler: HandlerType[R, RES],
+        handler: HandlerType[R, RRes],
         request: R,
         *args: Any,
         **kwargs: Any,
-    ) -> RES:
+    ) -> RRes:
         kwargs |= self._additional_kwargs
         return await self._call(handler, request, *args, **kwargs)
 
@@ -35,6 +33,6 @@ class DataRemoverMiddlewareMock(Middleware):
         request: R,
         *args: Any,
         **kwargs: Any,
-    ) -> RES:
+    ) -> RRes:
         kwargs = {key: val for key, val in kwargs.items() if key not in self._removable_args}
         return await self._call(handler, request, *args, **kwargs)

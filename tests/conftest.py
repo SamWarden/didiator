@@ -1,7 +1,7 @@
 import pytest
 
-from didiator.command_dispatcher import CommandDispatcherImpl
-from didiator.query_dispatcher import QueryDispatcherImpl
+from didiator.dispatchers.command import CommandDispatcherImpl
+from didiator.dispatchers.query import QueryDispatcherImpl
 
 
 @pytest.fixture()

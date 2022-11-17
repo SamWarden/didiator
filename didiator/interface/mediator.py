@@ -1,7 +1,7 @@
 from typing import Any, Protocol, TypeVar
 
-from didiator.command import Command
-from didiator.query import Query
+from didiator.interface.entities.command import Command
+from didiator.interface.entities.query import Query
 
 Self = TypeVar("Self", bound="BaseMediator")
 CRes = TypeVar("CRes")
@@ -26,7 +26,7 @@ class CommandMediator(BaseMediator, Protocol):
 
 
 class QueryMediator(BaseMediator, Protocol):
-    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> CRes:
+    async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> QRes:
         raise NotImplementedError
 
 

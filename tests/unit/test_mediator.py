@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 
-from didiator.command import Command, CommandHandler
-from didiator.command_dispatcher import CommandDispatcherImpl
+from didiator.interface.handlers import CommandHandler, QueryHandler
+from didiator.interface.entities.command import Command
+from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.mediator import CommandMediator, Mediator, QueryMediator
 from didiator.mediator import MediatorImpl
-from didiator.query import Query, QueryHandler
-from didiator.query_dispatcher import QueryDispatcherImpl
+from didiator.interface.entities.query import Query
+from didiator.dispatchers.query import QueryDispatcherImpl
 from tests.mocks.middlewares import DataRemoverMiddlewareMock
 
 
