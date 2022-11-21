@@ -1,3 +1,4 @@
+from functools import partial
 from typing import AsyncGenerator, Callable, Protocol
 
 import pytest
@@ -59,6 +60,18 @@ class UnitOfWorkImpl:
         return self._session.uri == "psql://uri"
 
 
+class Request(str):
+    pass
+
+
+async def controller(request: Request, uow: UnitOfWork, repo: Repo) -> str:
+    assert request == Request("val")
+    print("Start controller")
+    assert await uow.commit()
+    print("End controller")
+    return "data"
+
+
 @pytest.mark.asyncio
 async def test_class_initialization_with_deps() -> None:
     container = Container()
@@ -68,13 +81,19 @@ async def test_class_initialization_with_deps() -> None:
     container.bind(bind_by_type(Dependent(RepoImpl, scope="request"), Repo))
     container.bind(bind_by_type(Dependent(get_session_factory("psql://uri"), scope="request"), Session))
 
-    solved = container.solve(Dependent(Handler, scope="request"), scopes=["request"])
+    solved = container.solve(Dependent(Handler, scope="request"), scopes=["request", "sessio"])
+    solved_func = container.solve(Dependent(partial(controller, Request("val"), uow=1), scope="request"), scopes=["request", "s"])
     print("Before scope")
-    async with container.enter_scope("request") as state:
-        print("Inside scope")
-        handler = await container.execute_async(solved, executor=executor, state=state)
-        print("After handler initialization")
-        res = await handler.handle(True)
+    async with container.enter_scope("sesson") as state:
+        print("State1:", state)
+        async with container.enter_scope("request", state) as state:
+            print("Inside scope")
+            handler = await container.execute_async(solved, executor=executor, state=state)
+            print("After handler initialization")
+            res = await handler.handle(True)
+            controller_res = await container.execute_async(solved_func, executor=executor, state=state, values={lambda: Dependent(Request): Request("val")})
+            assert controller_res == "data"
+            print("Controller res:", controller_res)
 
     print("Call handler")
     assert res
