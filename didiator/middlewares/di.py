@@ -81,11 +81,9 @@ class DiMiddleware(Middleware):
     def _get_cached_solved_handler(self, handler: HandlerType, scope: Scope) -> SolvedDependent[HandlerType]:
         try:
             solved_handler = self._solved_handlers[handler]
-            print("Get cached solved handler:", solved_handler)
         except KeyError:
             solved_handler = self._di_container.solve(
                 Dependent(handler, scope=scope), scopes=self._di_scopes,
             )
             self._solved_handlers[handler] = solved_handler
-            print("Solve handler:", solved_handler)
         return solved_handler
