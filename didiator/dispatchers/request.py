@@ -4,8 +4,9 @@ from typing import Any, Awaitable, Callable, Sequence, Type, TypeVar
 
 from didiator.interface.entities.request import Request
 from didiator.interface.exceptions import HandlerNotFound
+from didiator.interface.handlers import HandlerType
 from didiator.middlewares.base import Middleware
-from didiator.interface.dispatchers.request import Dispatcher, MiddlewareType, HandlerType
+from didiator.interface.dispatchers.request import Dispatcher, MiddlewareType
 
 RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
@@ -33,7 +34,7 @@ class RequestDispatcherImpl(Dispatcher, abc.ABC):
         try:
             handler = self._handlers[type(request)]
         except KeyError:
-            raise HandlerNotFound()
+            raise HandlerNotFound(f"Request handler for {type(request).__name__} request is not registered", request)
 
         # Handler has to be wrapped with at least one middleware to initialize the handler if it is necessary
         middlewares = self._middlewares if self._middlewares else DEFAULT_MIDDLEWARES

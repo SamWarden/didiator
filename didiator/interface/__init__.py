@@ -1,9 +1,10 @@
-# from .command import Command, CommandHandler
-from didiator.interface.dispatchers.command import CommandDispatcher
-from didiator.interface.dispatchers.request import Dispatcher
+from .dispatchers.command import CommandDispatcher
+from .dispatchers.request import Dispatcher
+from .dispatchers.query import QueryDispatcher
 from .mediator import CommandMediator, Mediator, QueryMediator
-from didiator.interface.dispatchers.query import QueryDispatcher
-# from .query import Query, QueryHandler
+from .entities import Command, Query, Request
+from .handlers import CommandHandler, Handler, QueryHandler
+
 
 __all__ = (
     "Mediator",
@@ -12,9 +13,10 @@ __all__ = (
     "Dispatcher",
     "CommandDispatcher",
     "QueryDispatcher",
-    # "Command",
-    # "CommandHandler",
-    # "Query",
-    # "QueryHandler",
+    "Request",
+    "Command",
+    "Query",
+    "Handler",
+    "CommandHandler",
+    "QueryHandler",
 )
-

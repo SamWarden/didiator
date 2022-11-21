@@ -18,4 +18,4 @@ class CommandDispatcherImpl(RequestDispatcherImpl, CommandDispatcher):
         try:
             return await self._handle(command, *args, **kwargs)
         except HandlerNotFound:
-            raise CommandHandlerNotFound()
+            raise CommandHandlerNotFound(f"Command handler for {type(command).__name__} command is not registered", command)

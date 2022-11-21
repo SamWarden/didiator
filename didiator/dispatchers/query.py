@@ -18,4 +18,4 @@ class QueryDispatcherImpl(RequestDispatcherImpl, QueryDispatcher):
         try:
             return await self._handle(query, *args, **kwargs)
         except HandlerNotFound:
-            raise QueryHandlerNotFound()
+            raise QueryHandlerNotFound(f"Query handler for {type(query).__name__} query is not registered", query)

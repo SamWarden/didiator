@@ -1,11 +1,10 @@
 from typing import Any, TypeVar
 
-from didiator.interface.dispatchers.request import HandlerType
 from didiator.interface.entities.request import Request
-from didiator.interface.handlers.request import Handler
+from didiator.interface.handlers import HandlerType
 
 RRes = TypeVar("RRes")
-R = TypeVar("R", bound=Request)
+R = TypeVar("R", bound=Request[Any])
 
 
 class Middleware:
@@ -25,17 +24,7 @@ class Middleware:
         *args: Any,
         **kwargs: Any,
     ) -> RRes:
-        if isinstance(handler, type) and issubclass(handler, Handler):
+        if isinstance(handler, type):
             handler = handler()
 
-        return await handler(request, *args, **kwargs)  # noqa: type
-        # return await cast(
-        #     handler,
-        #     Callable[[HandlerType[C, CR] | "Middleware"], Awaitable[CR]],
-        # )(command, *args, **kwargs)
-
-
-# NextMiddlewareType = Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]]
-# MiddlewareType = Union[
-#     BaseMiddleware, Callable[[NextMiddlewareType, TelegramObject, Dict[str, Any]], Awaitable[Any]]
-# ]
+        return await handler(request, *args, **kwargs)
