@@ -1,12 +1,11 @@
 from typing import Any, Protocol, Type, TypeVar
 
 from didiator.interface.entities.command import Command
-from didiator.interface.dispatchers.request import Dispatcher, HandlerType
+from didiator.interface.dispatchers.request import Dispatcher
+from didiator.interface.handlers import HandlerType
 
 C = TypeVar("C", bound=Command[Any])
 CRes = TypeVar("CRes")
-
-# HandlerType = Callable[[C], Awaitable[CRes]] | Type[RequestHandler[C, CRes]]
 
 
 class CommandDispatcher(Dispatcher, Protocol):
