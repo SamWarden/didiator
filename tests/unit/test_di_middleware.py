@@ -9,6 +9,7 @@ from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherIm
 from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.mediator import MediatorImpl
 from didiator.middlewares.di import DiMiddleware
+from didiator.utils.di_builder import DiBuilder
 
 
 @dataclass
@@ -139,10 +140,10 @@ class TestDiMiddleware:
         di_container.bind(bind_by_type(Dependent(SessionMock, scope="mediator"), Session))
 
         command_dispatcher = CommandDispatcherImpl(middlewares=(
-            DiMiddleware(di_container, di_executor, ("mediator", "mediator_request"), cls_scope="mediator"),
+            DiMiddleware(DiBuilder(di_container, di_executor, ("mediator", "mediator_request")), cls_scope="mediator"),
         ))
         query_dispatcher = QueryDispatcherImpl(middlewares=(
-            DiMiddleware(di_container, di_executor, ("mediator", "mediator_request"), cls_scope="mediator"),
+            DiMiddleware(DiBuilder(di_container, di_executor, ("mediator", "mediator_request")), cls_scope="mediator"),
         ))
 
         command_dispatcher.register_handler(CreateUser, CreateUserHandler)
