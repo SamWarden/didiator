@@ -6,6 +6,8 @@ from di.container import bind_by_type, Container
 from di.dependent import Dependent
 from di.executors import AsyncExecutor
 
+# These tests are for understanding DI library, they're not for didiator
+
 
 class UnitOfWork(Protocol):
     async def commit(self) -> bool:
