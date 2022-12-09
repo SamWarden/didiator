@@ -9,7 +9,7 @@ This library is inspired by the `MediatR <https://github.com/jbogard/MediatR>`_ 
 and follows CQRS principles
 
 Installation
-======
+============
 
 Didiator is available on pypi: https://pypi.org/project/didiator
 
@@ -25,7 +25,7 @@ Examples
 You can find examples in `this folder <https://github.com/SamWarden/didiator/tree/dev/examples>`_
 
 Create Commands and Queries with handlers for them
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
