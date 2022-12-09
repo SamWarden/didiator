@@ -4,7 +4,7 @@ from .interface.handlers import CommandHandler, QueryHandler
 from .interface.mediator import Mediator
 from .mediator import MediatorImpl
 
-__version__ = '0.1.0'
+__version__ = "0.1.1"
 
 __all__ = (
     "__version__",
