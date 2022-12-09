@@ -15,7 +15,7 @@ Didiator is available on pypi: https://pypi.org/project/didiator
 
 .. code-block:: bash
 
-    pip install -U didiator[di]
+    pip install -U "didiator[di]"
 
 It will install ``didiator`` with its optional DI dependency that is necessary to use ``DiMiddleware`` and ``DiBuilder``
 
