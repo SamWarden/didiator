@@ -245,7 +245,7 @@ async def main() -> None:
         mediator = await di_builder.execute(Mediator, "app", state=di_state)
 
         dp = await di_builder.execute(aiogram.Dispatcher, "app", state=di_state)
-        dp.update.middleware(MediatorMiddleware(mediator, di_builder, di_state))
+        dp.update.outer_middleware(MediatorMiddleware(mediator, di_builder, di_state))
         dp.message.register(echo_handler)
 
         bot = await di_builder.execute(aiogram.Bot, "app", state=di_state)
