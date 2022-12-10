@@ -22,7 +22,7 @@ It will install ``didiator`` with its optional DI dependency that is necessary t
 Examples
 ========
 
-You can find examples in `this folder <https://github.com/SamWarden/didiator/tree/dev/examples>`_
+You can find more examples in `this folder <https://github.com/SamWarden/didiator/tree/dev/examples>`_
 
 Create Commands and Queries with handlers for them
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,7 +53,7 @@ You can use functions as handlers
         user_id: int
 
     async def handle_get_user_by_id(query: GetUserById, user_repo: UserRepo) -> User:
-        user = await self._user_repo.get_user_by_id(user)
+        user = await user_repo.get_user_by_id(query.user_id)
         return user
 
 Create DiBuilder
