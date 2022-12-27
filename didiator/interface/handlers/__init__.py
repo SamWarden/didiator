@@ -1,10 +1,15 @@
-from .command import CommandHandler
+from .command import CommandHandler, CommandHandlerType
+from .event import EventHandler, EventHandlerType
 from .request import Handler, HandlerType
-from .query import QueryHandler
+from .query import QueryHandler, QueryHandlerType
 
 __all__ = (
-    "CommandHandler",
     "Handler",
-    "QueryHandler",
     "HandlerType",
+    "CommandHandler",
+    "CommandHandlerType",
+    "QueryHandler",
+    "QueryHandlerType",
+    "EventHandler",
+    "EventHandlerType",
 )
