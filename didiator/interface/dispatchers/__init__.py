@@ -3,7 +3,7 @@ from .request import Dispatcher
 from .query import QueryDispatcher
 
 __all__ = (
-    "CommandDispatcher",
     "Dispatcher",
+    "CommandDispatcher",
     "QueryDispatcher",
 )
