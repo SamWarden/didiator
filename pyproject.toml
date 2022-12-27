@@ -32,7 +32,6 @@ classifiers = [
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/SamWarden/didiator/issues"
 
-
 [tool.poetry.dependencies]
 python = "^3.10,<4"
 di = {version = "^0.73.0", extras = ["anyio"], optional = true}
@@ -44,7 +43,18 @@ di = ["di"]
 pytest = "^7.2.0"
 mypy = "^0.991"
 pytest-asyncio = "^0.20.3"
+pylint = "^2.15.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pylint]
+disable = [
+    "C0114",  # Missing module docstrings
+    "C0115",  # Missing class docstrings
+    "C0116",  # Missing function docstrings
+    "R0903",  # Too few public methods
+
+]
+max-line-length = 120
