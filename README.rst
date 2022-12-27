@@ -168,11 +168,11 @@ Event handlers will be executed sequentially
 
 .. code-block:: python
 
-    mediator.publish(UserCreated(1, "Jon"))
+    await mediator.publish(UserCreated(1, "Jon"))
     # User created1: id=1,  username="Jon"
     # User created2: id=1,  username="Jon"
 
-    mediator.publish([UserCreated(2, "Sam"), UserCreated(3, "Nick")])
+    await mediator.publish([UserCreated(2, "Sam"), UserCreated(3, "Nick")])
     # User created1: id=2,  username="Sam"
     # User created2: id=2,  username="Sam"
     # User created1: id=3,  username="Nick"
