@@ -3,6 +3,7 @@ from typing import Any, Generic, Protocol, Type, TypeVar
 
 from didiator.interface.entities.event import Event
 from didiator.interface.handlers.event import EventHandlerType
+from didiator.middlewares.base import MiddlewareType
 
 E = TypeVar("E", bound=Event)
 
@@ -27,6 +28,10 @@ class Listener(Generic[E]):
 class EventObserver(Protocol):
     @property
     def listeners(self) -> tuple[Listener[Any], ...]:
+        raise NotImplementedError
+
+    @property
+    def middlewares(self) -> tuple[MiddlewareType[Event, Any], ...]:
         raise NotImplementedError
 
     def register_listener(self, listener: Listener[Any]) -> None:
