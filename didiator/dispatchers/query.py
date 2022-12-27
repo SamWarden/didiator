@@ -4,13 +4,13 @@ from didiator.interface.handlers.request import HandlerType
 from didiator.interface.dispatchers.query import QueryDispatcher
 from didiator.interface.entities.query import Query
 from didiator.interface.exceptions import HandlerNotFound, QueryHandlerNotFound
-from didiator.dispatchers.request import RequestDispatcherImpl
+from didiator.dispatchers.request import DispatcherImpl
 
 QRes = TypeVar("QRes")
 Q = TypeVar("Q", bound=Query[Any])
 
 
-class QueryDispatcherImpl(RequestDispatcherImpl, QueryDispatcher):
+class QueryDispatcherImpl(DispatcherImpl, QueryDispatcher):
     def register_handler(self, query: Type[Q], handler: HandlerType[Q, QRes]) -> None:
         super()._register_handler(query, handler)
 

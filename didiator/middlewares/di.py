@@ -10,7 +10,7 @@ from didiator.middlewares import Middleware
 from didiator.utils.di_builder import DiBuilder
 
 RRes = TypeVar("RRes")
-R = TypeVar("R", bound=Request)
+R = TypeVar("R", bound=Request[Any])
 DEFAULT_STATE_KEY = "di_state"
 
 
@@ -59,7 +59,9 @@ class DiMiddleware(Middleware):
     ) -> RRes:
         async with self._di_builder.enter_scope(self._mediator_scope.func_handler, di_state) as scoped_di_state:
             handler = await self._di_builder.execute(
-                handler, self._mediator_scope.cls_handler, state=scoped_di_state, values={type(request): request},
+                handler, self._mediator_scope.cls_handler, state=scoped_di_state, values={
+                    type(request): request, ContainerState: di_state,
+                },
             )
             return await handler(request, *args, **kwargs)
 
@@ -68,5 +70,7 @@ class DiMiddleware(Middleware):
     ) -> RRes:
         async with self._di_builder.enter_scope(self._mediator_scope.func_handler, di_state) as scoped_di_state:
             return await self._di_builder.execute(
-                handler, self._mediator_scope.func_handler, state=scoped_di_state, values={type(request): request},
+                handler, self._mediator_scope.func_handler, state=scoped_di_state, values={
+                    type(request): request, ContainerState: di_state,
+                },
             )
