@@ -6,7 +6,7 @@ from .interface.handlers import CommandHandler, QueryHandler
 from .interface.mediator import Mediator, CommandMediator, QueryMediator, EventMediator
 from .mediator import MediatorImpl
 
-__version__ = "0.1.1"
+__version__ = "0.2.0"
 
 __all__ = (
     "__version__",
