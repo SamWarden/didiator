@@ -8,12 +8,13 @@ from didiator.interface.handlers.event import EventHandlerType
 from didiator.middlewares.base import MiddlewareType, wrap_middleware
 
 E = TypeVar("E", bound=Event)
+Middlewares = Sequence[MiddlewareType[Event, Any]]
 
 
 class EventObserverImpl(EventObserver):
-    def __init__(self, middlewares: Sequence[MiddlewareType[Event, Any]] = ()) -> None:
+    def __init__(self, middlewares: Middlewares = ()) -> None:
         self._listeners: list[Listener[Event]] = []
-        self._middlewares: Sequence[MiddlewareType[Event, Any]] = middlewares
+        self._middlewares: Middlewares = middlewares
 
     @property
     def listeners(self) -> tuple[Listener[Event], ...]:
@@ -31,7 +32,7 @@ class EventObserverImpl(EventObserver):
 
     async def _handle(self, events: Sequence[Event], *args: Any, **kwargs: Any) -> None:
         # Handler has to be wrapped with at least one middleware to initialize the handler if it is necessary
-        middlewares = self._middlewares if self._middlewares else DEFAULT_MIDDLEWARES
+        middlewares: Middlewares = self._middlewares if self._middlewares else DEFAULT_MIDDLEWARES
 
         for event in events:
             for listener in self._listeners:
@@ -41,7 +42,7 @@ class EventObserverImpl(EventObserver):
 
     @staticmethod
     def _wrap_middleware(
-        middlewares: Sequence[MiddlewareType[E, Any]],
+        middlewares: Middlewares,
         handler: EventHandlerType[E],
     ) -> Callable[..., Awaitable[Any]]:
         return wrap_middleware(middlewares, handler)
