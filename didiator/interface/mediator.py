@@ -9,11 +9,11 @@ from didiator.interface.handlers.event import EventHandlerType
 from didiator.interface.handlers.query import QueryHandlerType
 
 Self = TypeVar("Self", bound="BaseMediator")
+E = TypeVar("E", bound=Event)
 C = TypeVar("C", bound=Command[Any])
 CRes = TypeVar("CRes")
 Q = TypeVar("Q", bound=Query[Any])
 QRes = TypeVar("QRes")
-E = TypeVar("E", bound=Event)
 
 
 class BaseMediator(Protocol):

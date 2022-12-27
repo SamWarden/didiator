@@ -30,7 +30,7 @@ class DiBuilder:
 
     async def execute(
         self, call: DependencyProviderType[T], scope: Scope,
-        *, state: ContainerState | None = None, values: Mapping[DependencyProvider, Any] | None = None,
+        *, state: ContainerState, values: Mapping[DependencyProvider, Any] | None = None,
     ) -> T:
         solved_dependency = self.get_solved(call, scope)
         return await self._di_container.execute_async(
