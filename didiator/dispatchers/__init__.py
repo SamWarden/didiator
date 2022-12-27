@@ -1,9 +1,9 @@
 from .command import CommandDispatcherImpl
-from .request import RequestDispatcherImpl
+from .request import DispatcherImpl
 from .query import QueryDispatcherImpl
 
 __all__ = (
     "CommandDispatcherImpl",
-    "RequestDispatcherImpl",
+    "DispatcherImpl",
     "QueryDispatcherImpl",
 )
