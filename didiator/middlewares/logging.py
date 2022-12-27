@@ -13,8 +13,8 @@ R = TypeVar("R", bound=Request[Any])
 
 
 class Logger(Protocol):
-    def log(self, level: int, msg: str, *, extra: dict[str, Any] | None = None) -> None:
-        ...
+    def log(self, level: int, msg: str, *args: Any, extra: dict[str, Any] | None = None) -> None:
+        raise NotImplementedError
 
 
 class LoggingMiddleware(Middleware):
@@ -33,22 +33,28 @@ class LoggingMiddleware(Middleware):
         **kwargs: Any,
     ) -> RRes:
         if isinstance(request, Command):
-            self._logger.log(self._level, f"Send {type(request).__name__} command", extra={"command": request})
+            self._logger.log(self._level, "Send %s command", type(request).__name__, extra={"command": request})
         elif isinstance(request, Query):
-            self._logger.log(self._level, f"Make {type(request).__name__} query", extra={"query": request})
+            self._logger.log(self._level, "Make %s query", type(request).__name__, extra={"query": request})
         elif isinstance(request, Event):
-            self._logger.log(self._level, f"Publish {type(request).__name__} event", extra={"event": request})
+            self._logger.log(self._level, "Publish %s event", type(request).__name__, extra={"event": request})
         else:
-            self._logger.log(self._level, f"Execute {type(request).__name__} request", extra={"request": request})
+            self._logger.log(self._level, "Execute %s request", type(request).__name__, extra={"request": request})
 
         res = await self._call(handler, request, *args, **kwargs)
         if isinstance(request, Command):
-            self._logger.log(self._level, f"Command {type(request).__name__} sent. Result: {res}", extra={"result": res})
+            self._logger.log(
+                self._level, "Command %s sent. Result: %s", type(request).__name__, res, extra={"result": res},
+            )
         elif isinstance(request, Query):
-            self._logger.log(self._level, f"Query {type(request).__name__} made. Result: {res}", extra={"result": res})
+            self._logger.log(
+                self._level, "Query %s made. Result: %s", type(request).__name__, res, extra={"result": res},
+            )
         elif isinstance(request, Event):
-            self._logger.log(self._level, f"Event {type(request).__name__} published", extra={"event": request})
+            self._logger.log(self._level, "Event %s published", type(request).__name__, extra={"event": request})
         else:
-            self._logger.log(self._level, f"Request {type(request).__name__} executed. Result: {res}", extra={"result": res})
+            self._logger.log(
+                self._level, "Request %s executed. Result: %s", type(request).__name__, res, extra={"result": res},
+            )
 
         return res
