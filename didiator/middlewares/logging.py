@@ -1,13 +1,15 @@
 from typing import Any, Protocol, TypeVar
 import logging
 
-from didiator import Command, Query
+from didiator.interface.entities.command import Command
+from didiator.interface.entities.event import Event
 from didiator.interface.entities.request import Request
+from didiator.interface.entities.query import Query
 from didiator.interface.handlers import HandlerType
 from didiator.middlewares import Middleware
 
 RRes = TypeVar("RRes")
-R = TypeVar("R", bound=Request)
+R = TypeVar("R", bound=Request[Any])
 
 
 class Logger(Protocol):
@@ -34,6 +36,8 @@ class LoggingMiddleware(Middleware):
             self._logger.log(self._level, f"Send {type(request).__name__} command", extra={"command": request})
         elif isinstance(request, Query):
             self._logger.log(self._level, f"Make {type(request).__name__} query", extra={"query": request})
+        elif isinstance(request, Event):
+            self._logger.log(self._level, f"Publish {type(request).__name__} event", extra={"event": request})
         else:
             self._logger.log(self._level, f"Execute {type(request).__name__} request", extra={"request": request})
 
@@ -42,6 +46,8 @@ class LoggingMiddleware(Middleware):
             self._logger.log(self._level, f"Command {type(request).__name__} sent. Result: {res}", extra={"result": res})
         elif isinstance(request, Query):
             self._logger.log(self._level, f"Query {type(request).__name__} made. Result: {res}", extra={"result": res})
+        elif isinstance(request, Event):
+            self._logger.log(self._level, f"Event {type(request).__name__} published", extra={"event": request})
         else:
             self._logger.log(self._level, f"Request {type(request).__name__} executed. Result: {res}", extra={"result": res})
 
