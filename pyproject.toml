@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "didiator"
-version = "0.1.1"
+version = "0.2.0"
 description = "A library that implements the Mediator pattern and uses DI library"
 authors = [
     "SamWarden <SamWardenSad@gmail.com>",
@@ -18,6 +18,8 @@ keywords = [
     "mediator",
     "CQRS",
     "DI",
+    "events",
+    "ioc",
 ]
 classifiers = [
     "License :: OSI Approved :: MIT License",
