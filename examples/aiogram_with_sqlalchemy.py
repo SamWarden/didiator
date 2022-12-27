@@ -1,8 +1,8 @@
 import asyncio
 import os
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Callable
 from dataclasses import dataclass
-from typing import Any, Awaitable, Callable, Protocol
+from typing import Any, Awaitable, Protocol
 import logging
 
 import aiogram
@@ -15,8 +15,9 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, sessionmaker
 
-from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherImpl, QueryHandler
+from didiator import Command, CommandHandler, Event, EventObserverImpl, Mediator, Query, QueryDispatcherImpl
 from didiator.dispatchers.command import CommandDispatcherImpl
+from didiator.interface.handlers.event import EventHandler
 from didiator.mediator import MediatorImpl
 from didiator.middlewares.di import DiMiddleware
 from didiator.middlewares.logging import LoggingMiddleware
@@ -56,6 +57,22 @@ class UserRepo(Protocol):
         ...
 
 
+# User created event and its handler
+@dataclass(frozen=True)
+class UserCreated(Event):
+    user_id: int
+    username: str
+
+
+class UserCreatedHandler(EventHandler[UserCreated]):
+    def __init__(self, bot: aiogram.Bot):
+        self._bot = bot
+
+    async def __call__(self, event: UserCreated) -> None:
+        logger.info("User registered, %s", self._bot)
+        await self._bot.send_message(event.user_id, f"{event.username}, you're registered")
+
+
 # Create user command and its handler
 @dataclass(frozen=True)
 class CreateUser(Command[int]):
@@ -68,12 +85,15 @@ class UserAlreadyExists(RuntimeError):
 
 
 class CreateUserHandler(CommandHandler[CreateUser, int]):
-    def __init__(self, user_repo: UserRepo):
+    def __init__(self, mediator: Mediator, user_repo: UserRepo):
+        self._mediator = mediator
         self._user_repo = user_repo
 
     async def __call__(self, command: CreateUser) -> int:
         user = User(id=command.user_id, username=command.username)
         self._user_repo.add_user(user)
+        await self._mediator.publish(UserCreated(user.id, user.username))
+
         try:
             await self._user_repo.commit()
         except IntegrityError:
@@ -89,13 +109,9 @@ class GetUserById(Query[User]):
     user_id: int
 
 
-class GetUserByIdHandler(QueryHandler[GetUserById, User]):
-    def __init__(self, user_repo: UserRepo):
-        self._user_repo = user_repo
-
-    async def __call__(self, query: GetUserById) -> User:
-        user = await self._user_repo.get_user_by_id(query.user_id)
-        return user
+async def handle_get_user_by_id(query: GetUserById, user_repo: UserRepo) -> User:
+    user = await user_repo.get_user_by_id(query.user_id)
+    return user
 
 
 class UserModel(BaseModel):
@@ -168,13 +184,15 @@ def build_tg_dispatcher() -> aiogram.Dispatcher:
 
 
 def build_mediator(di_builder: DiBuilder) -> Mediator:
-    dispatchers_middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, cls_scope="tg_update"))
-    command_dispatcher = CommandDispatcherImpl(middlewares=dispatchers_middlewares)
-    query_dispatcher = QueryDispatcherImpl(middlewares=dispatchers_middlewares)
+    middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, cls_scope="tg_update"))
+    command_dispatcher = CommandDispatcherImpl(middlewares=middlewares)
+    query_dispatcher = QueryDispatcherImpl(middlewares=middlewares)
+    event_observer = EventObserverImpl(middlewares=middlewares)
 
-    mediator = MediatorImpl(command_dispatcher, query_dispatcher)
+    mediator = MediatorImpl(command_dispatcher, query_dispatcher, event_observer)
     mediator.register_command_handler(CreateUser, CreateUserHandler)
-    mediator.register_query_handler(GetUserById, GetUserByIdHandler)
+    mediator.register_query_handler(GetUserById, handle_get_user_by_id)
+    mediator.register_event_handler(UserCreated, UserCreatedHandler)
 
     return mediator
 
@@ -194,6 +212,12 @@ def setup_di_builder() -> DiBuilder:
     di_builder.bind(bind_by_type(Dependent(build_sa_session, scope="tg_update"), AsyncSession))
     di_builder.bind(bind_by_type(Dependent(build_repo, scope="tg_update"), UserRepo))
     return di_builder
+
+
+def create_mediator_builder(mediator: Mediator) -> Callable[[ContainerState], Mediator]:
+    def _build_mediator(di_state: ContainerState) -> Mediator:
+        return mediator.bind(di_state=di_state)
+    return _build_mediator
 
 
 class MediatorMiddleware(aiogram.BaseMiddleware):
@@ -243,6 +267,7 @@ async def main() -> None:
 
     async with di_builder.enter_scope("app") as di_state:
         mediator = await di_builder.execute(Mediator, "app", state=di_state)
+        di_builder.bind(bind_by_type(Dependent(create_mediator_builder(mediator), scope="tg_update"), Mediator))
 
         dp = await di_builder.execute(aiogram.Dispatcher, "app", state=di_state)
         dp.update.outer_middleware(MediatorMiddleware(mediator, di_builder, di_state))

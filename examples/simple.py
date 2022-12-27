@@ -7,7 +7,7 @@ from di.container import bind_by_type, Container
 from di.dependent import Dependent
 from di.executors import AsyncExecutor
 
-from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherImpl, QueryHandler
+from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherImpl
 from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.mediator import MediatorImpl
 from didiator.middlewares.di import DiMiddleware
@@ -110,8 +110,8 @@ async def main() -> None:
     async with di_builder.enter_scope("app") as di_state:
         mediator = await di_builder.execute(Mediator, "app", state=di_state)
 
-        async with di_builder.enter_scope("request", di_state) as di_state:
-            scoped_mediator = mediator.bind(di_state=di_state)
+        async with di_builder.enter_scope("request", di_state) as request_di_state:
+            scoped_mediator = mediator.bind(di_state=request_di_state)
 
             # It will call CreateUserHandler(UserRepoImpl()).__call__(command)
             # UserRepoImpl() created and injected automatically
