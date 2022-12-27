@@ -118,7 +118,7 @@ async def main() -> None:
             user_id = await scoped_mediator.send(CreateUser(1, "Jon"))
             logger.info(f"Created a user with id: {user_id}")
 
-            # It will call get_user_by_id(query, user_repo)
+            # It will call handle_get_user_by_id(query, user_repo)
             # UserRepoImpl created earlier will be reused in this scope
             user = await scoped_mediator.query(GetUserById(user_id))
             logger.info(f"User: {user}")
