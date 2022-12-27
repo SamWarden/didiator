@@ -17,5 +17,7 @@ class QueryDispatcherImpl(DispatcherImpl, QueryDispatcher):
     async def query(self, query: Query[QRes], *args: Any, **kwargs: Any) -> QRes:
         try:
             return await self._handle(query, *args, **kwargs)
-        except HandlerNotFound:
-            raise QueryHandlerNotFound(f"Query handler for {type(query).__name__} query is not registered", query)
+        except HandlerNotFound as err:
+            raise QueryHandlerNotFound(
+                f"Query handler for {type(query).__name__} query is not registered", query,
+            ) from err
