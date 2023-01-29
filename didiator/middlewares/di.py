@@ -29,16 +29,15 @@ class DiMiddleware(Middleware):
 
         mediator_scope = MediatorDiScope(func_scope if cls_scope is ... else cls_scope, func_scope)
         self._mediator_scope = mediator_scope
-        self._di_builder.di_scopes = self._get_di_scopes(tuple(self._di_builder.di_scopes), mediator_scope)
+        self._register_di_scopes()
 
         self._state_key = state_key
 
-    def _get_di_scopes(self, di_scopes: tuple[Scope, ...], mediator_scope: MediatorDiScope) -> tuple[Scope, ...]:
-        if mediator_scope.cls_handler not in di_scopes:
-            di_scopes += (mediator_scope.cls_handler,)
-        if mediator_scope.func_handler not in di_scopes:
-            di_scopes += (mediator_scope.func_handler,)
-        return di_scopes
+    def _register_di_scopes(self) -> None:
+        if self._mediator_scope.cls_handler not in self._di_builder.di_scopes:
+            self._di_builder.di_scopes.append(self._mediator_scope.cls_handler)
+        if self._mediator_scope.func_handler not in self._di_builder.di_scopes:
+            self._di_builder.di_scopes.append(self._mediator_scope.func_handler)
 
     async def _call(
         self,

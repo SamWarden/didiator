@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, ContextManager, TypeVar
+from typing import Any, ContextManager, Protocol, TypeVar
 
 from di import ScopeState, SolvedDependent
 from di._container import BindHook
@@ -10,7 +10,9 @@ from di.api.scopes import Scope
 DependencyType = TypeVar("DependencyType")
 
 
-class DiBuilder:
+class DiBuilder(Protocol):
+    di_scopes: list[Scope]
+
     def bind(self, hook: BindHook) -> ContextManager[None]:
         raise NotImplementedError
 

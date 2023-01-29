@@ -61,13 +61,13 @@ Create DiBuilder
 
 ``DiBuilderImpl`` is a facade for Container from DI with caching of `solving <https://www.adriangb.com/di/0.73.0/solving/>`_
 
-``di_scopes`` is a sequence with the order of `scopes <https://www.adriangb.com/di/0.73.0/scopes/>`_
+``di_scopes`` is a list with the order of `scopes <https://www.adriangb.com/di/0.73.0/scopes/>`_
 
 ``di_builder.bind(...)`` will `bind <https://www.adriangb.com/di/0.73.0/binds/>`_ ``UserRepoImpl`` type to ``UserRepo`` protocol
 
 .. code-block:: python
 
-    di_scopes = ("request",)
+    di_scopes = ["request"]
     di_builder = DiBuilderImpl(Container(), AsyncExecutor(), di_scopes)
     di_builder.bind(bind_by_type(Dependent(UserRepoImpl, scope="request"), UserRepo))
 
@@ -159,7 +159,6 @@ You can register multiple event handlers for one event
 
     mediator.register_event_handler(UserCreated, on_user_created1)
     mediator.register_event_handler(UserCreated, on_user_created2)
-
 
 Publish event
 -------------
