@@ -9,10 +9,12 @@ from di.api.solved import SolvedDependent
 from di.container import BindHook, Container, ContainerState
 from di.dependent import Dependent
 
+from didiator.interface.utils.di_builder import DiBuilder
+
 T = TypeVar("T")
 
 
-class DiBuilder:
+class DiBuilderImpl(DiBuilder):
     def __init__(
         self, di_container: Container, di_executor: SupportsAsyncExecutor, di_scopes: Sequence[Scope] = (),
     ) -> None:

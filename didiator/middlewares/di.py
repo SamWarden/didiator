@@ -6,8 +6,8 @@ from di.container import ContainerState
 
 from didiator.interface.entities.request import Request
 from didiator.interface.handlers import HandlerType
+from didiator.interface.utils.di_builder import DiBuilder
 from didiator.middlewares import Middleware
-from didiator.utils.di_builder import DiBuilder
 
 RRes = TypeVar("RRes")
 R = TypeVar("R", bound=Request[Any])
