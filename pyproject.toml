@@ -36,7 +36,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10,<4"
-di = {version = "^0.73.0", extras = ["anyio"], optional = true}
+di = {version = "^0.75.0", extras = ["anyio"], optional = true}
 
 [tool.poetry.extras]
 di = ["di"]

@@ -1,9 +1,10 @@
 from functools import partial
-from typing import AsyncGenerator, Callable, Protocol
+from typing import Annotated, Any, AsyncGenerator, Callable, Protocol
 
 import pytest
-from di.container import bind_by_type, Container
-from di.dependent import Dependent
+from di.api.dependencies import DependentBase
+from di import bind_by_type, Container
+from di.dependent import Dependent, Marker
 from di.executors import AsyncExecutor
 
 # These tests are for understanding DI library, they're not for didiator
@@ -88,12 +89,12 @@ async def test_class_initialization_with_deps() -> None:
     print("Before scope")
     async with container.enter_scope("sesson") as state:
         print("State1:", state)
-        async with container.enter_scope("request", state) as state:
-            print("Inside scope")
-            handler = await container.execute_async(solved, executor=executor, state=state)
+        async with container.enter_scope("request", state) as di_state:
+            print("Inside scope", di_state.stacks, state.stacks)
+            handler = await solved.execute_async(executor=executor, state=di_state)
             print("After handler initialization")
             res = await handler.handle(True)
-            controller_res = await container.execute_async(solved_func, executor=executor, state=state, values={lambda: Dependent(Request): Request("val")})
+            controller_res = await solved_func.execute_async(executor=executor, state=di_state, values={lambda: Dependent(Request): Request("val")})
             assert controller_res == "data"
             print("Controller res:", controller_res)
 

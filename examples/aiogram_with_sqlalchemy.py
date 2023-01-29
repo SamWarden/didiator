@@ -8,11 +8,11 @@ import logging
 import aiogram
 import aiogram.filters
 import aiogram.types as tg
-from di.container import bind_by_type, Container, ContainerState
+from di import bind_by_type, Container, ScopeState
 from di.dependent import Dependent
 from di.executors import AsyncExecutor
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column, sessionmaker
 
 from didiator import Command, CommandHandler, Event, EventObserverImpl, Mediator, Query, QueryDispatcherImpl
@@ -163,12 +163,12 @@ async def build_sa_engine(config: Config) -> AsyncGenerator[AsyncEngine, None]:
     await engine.dispose()
 
 
-def build_sa_pool(engine: AsyncEngine) -> sessionmaker:
-    return sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False, autoflush=False)
+def build_sa_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+    return async_sessionmaker(bind=engine, expire_on_commit=False, autoflush=False)
 
 
-async def build_sa_session(pool: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
-    async with pool() as session:
+async def build_sa_session(session_factory: async_sessionmaker[AsyncSession]) -> AsyncGenerator[AsyncSession, None]:
+    async with session_factory() as session:
         yield session
 
 
@@ -209,22 +209,22 @@ def setup_di_builder() -> DiBuilderImpl:
     di_builder.bind(bind_by_type(Dependent(build_mediator, scope="app"), Mediator))
     di_builder.bind(bind_by_type(Dependent(build_tg_bot, scope="app"), aiogram.Bot))
     di_builder.bind(bind_by_type(Dependent(build_sa_engine, scope="app"), AsyncEngine))
-    di_builder.bind(bind_by_type(Dependent(build_sa_pool, scope="app"), sessionmaker))
+    di_builder.bind(bind_by_type(Dependent(build_sa_session_factory, scope="app"), async_sessionmaker[AsyncSession]))
     di_builder.bind(bind_by_type(Dependent(build_sa_session, scope="tg_update"), AsyncSession))
     di_builder.bind(bind_by_type(Dependent(build_repo, scope="tg_update"), UserRepo))
     return di_builder
 
 
-def create_mediator_builder(mediator: Mediator) -> Callable[[ContainerState], Mediator]:
-    def _build_mediator(di_state: ContainerState) -> Mediator:
+def create_mediator_builder(mediator: Mediator) -> Callable[[ScopeState], Mediator]:
+    def _build_mediator(di_state: ScopeState) -> Mediator:
         return mediator.bind(di_state=di_state)
     return _build_mediator
 
 
 class MediatorMiddleware(aiogram.BaseMiddleware):
     def __init__(
-        self, mediator: Mediator, di_builder: DiBuilder, di_state: ContainerState | None = None,
-    ):
+        self, mediator: Mediator, di_builder: DiBuilder, di_state: ScopeState | None = None,
+    ) -> None:
         self._mediator = mediator
         self._di_builder = di_builder
         self._di_state = di_state

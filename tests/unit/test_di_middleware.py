@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Protocol
 
-from di.container import bind_by_type, Container
+from di import bind_by_type, Container
 from di.dependent import Dependent
 from di.executors import AsyncExecutor
 

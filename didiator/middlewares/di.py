@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
+from di import ScopeState
 from di.api.scopes import Scope
-from di.container import ContainerState
 
 from didiator.interface.entities.request import Request
 from didiator.interface.handlers import HandlerType
@@ -47,30 +47,30 @@ class DiMiddleware(Middleware):
         *args: Any,
         **kwargs: Any,
     ) -> RRes:
-        di_state: ContainerState | None = kwargs.pop(self._state_key, None)
+        di_state: ScopeState | None = kwargs.pop(self._state_key, None)
 
         if isinstance(handler, type):
             return await self._call_class_handler(handler, request, di_state, *args, **kwargs)
         return await self._call_func_handler(handler, request, di_state)
 
     async def _call_class_handler(
-        self, handler: HandlerType[R, RRes], request: R, di_state: ContainerState | None,
+        self, handler: HandlerType[R, RRes], request: R, di_state: ScopeState | None,
         *args: Any, **kwargs: Any,
     ) -> RRes:
         async with self._di_builder.enter_scope(self._mediator_scope.func_handler, di_state) as scoped_di_state:
             handler = await self._di_builder.execute(
                 handler, self._mediator_scope.cls_handler, state=scoped_di_state, values={
-                    type(request): request, ContainerState: di_state,
+                    type(request): request, ScopeState: di_state,
                 },
             )
             return await handler(request, *args, **kwargs)
 
     async def _call_func_handler(
-        self, handler: HandlerType[R, RRes], request: R, di_state: ContainerState | None,
+        self, handler: HandlerType[R, RRes], request: R, di_state: ScopeState | None,
     ) -> RRes:
         async with self._di_builder.enter_scope(self._mediator_scope.func_handler, di_state) as scoped_di_state:
             return await self._di_builder.execute(
                 handler, self._mediator_scope.func_handler, state=scoped_di_state, values={
-                    type(request): request, ContainerState: di_state,
+                    type(request): request, ScopeState: di_state,
                 },
             )
