@@ -8,7 +8,7 @@ from di.executors import AsyncExecutor
 from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherImpl, QueryHandler
 from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.mediator import MediatorImpl
-from didiator.middlewares.di import DiMiddleware
+from didiator.middlewares.di import DiMiddleware, DiScopes
 from didiator.utils.di_builder import DiBuilderImpl
 
 
@@ -139,11 +139,12 @@ class TestDiMiddleware:
         di_container.bind(bind_by_type(Dependent(UserRepoMock, scope="mediator"), UserRepo))
         di_container.bind(bind_by_type(Dependent(SessionMock, scope="mediator"), Session))
 
+        di_scopes = ["mediator", "mediator_request"]
         command_dispatcher = CommandDispatcherImpl(middlewares=(
-            DiMiddleware(DiBuilderImpl(di_container, di_executor, ["mediator", "mediator_request"]), cls_scope="mediator"),
+            DiMiddleware(DiBuilderImpl(di_container, di_executor, di_scopes), scopes=DiScopes("mediator")),
         ))
         query_dispatcher = QueryDispatcherImpl(middlewares=(
-            DiMiddleware(DiBuilderImpl(di_container, di_executor, ["mediator", "mediator_request"]), cls_scope="mediator"),
+            DiMiddleware(DiBuilderImpl(di_container, di_executor, di_scopes), scopes=DiScopes("mediator")),
         ))
 
         command_dispatcher.register_handler(CreateUser, CreateUserHandler)
