@@ -11,7 +11,7 @@ from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherIm
 from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.utils.di_builder import DiBuilder
 from didiator.mediator import MediatorImpl
-from didiator.middlewares.di import DiMiddleware
+from didiator.middlewares.di import DiMiddleware, DiScopes
 from didiator.middlewares.logging import LoggingMiddleware
 from didiator.utils.di_builder import DiBuilderImpl
 
@@ -82,7 +82,10 @@ class UserRepoImpl(UserRepo):
 
 
 def build_mediator(di_builder: DiBuilder) -> Mediator:
-    dispatchers_middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, cls_scope="request"))
+    dispatchers_middlewares = (
+        LoggingMiddleware(level=logging.INFO),
+        DiMiddleware(di_builder, scopes=DiScopes("request")),
+    )
     command_dispatcher = CommandDispatcherImpl(middlewares=dispatchers_middlewares)
     query_dispatcher = QueryDispatcherImpl(middlewares=dispatchers_middlewares)
 

@@ -80,7 +80,7 @@ Create dispatchers with their middlewares and use them to initialize the ``Media
 
 .. code-block:: python
 
-    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, cls_scope="request"))
+    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, scopes=DiScopes("request")))
     command_dispatcher = CommandDispatcherImpl(middlewares=middlewares)
     query_dispatcher = QueryDispatcherImpl(middlewares=middlewares)
 
@@ -145,7 +145,7 @@ Create EventObserver and use it for Mediator
 
 .. code-block:: python
 
-    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, cls_scope="request"))
+    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, scopes=DiScopes("request")))
     event_observer = EventObserver(middlewares=middlewares)
 
     mediator = MediatorImpl(command_dispatcher, query_dispatcher, event_observer)

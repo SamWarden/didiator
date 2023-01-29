@@ -20,7 +20,7 @@ from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.handlers.event import EventHandler
 from didiator.interface.utils.di_builder import DiBuilder
 from didiator.mediator import MediatorImpl
-from didiator.middlewares.di import DiMiddleware
+from didiator.middlewares.di import DiMiddleware, DiScopes
 from didiator.middlewares.logging import LoggingMiddleware
 from didiator.utils.di_builder import DiBuilderImpl
 
@@ -185,7 +185,8 @@ def build_tg_dispatcher() -> aiogram.Dispatcher:
 
 
 def build_mediator(di_builder: DiBuilder) -> Mediator:
-    middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, cls_scope="tg_update"))
+    # middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, scope="tg_update"))
+    middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, scopes=DiScopes("tg_update")))
     command_dispatcher = CommandDispatcherImpl(middlewares=middlewares)
     query_dispatcher = QueryDispatcherImpl(middlewares=middlewares)
     event_observer = EventObserverImpl(middlewares=middlewares)
