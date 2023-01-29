@@ -1,26 +1,27 @@
-from typing import Any, ContextManager, Mapping, TypeVar
+from collections.abc import Mapping
+from typing import Any, ContextManager, TypeVar
 
+from di import ScopeState, SolvedDependent
+from di._container import BindHook
 from di._utils.types import FusedContextManager
 from di.api.providers import DependencyProvider, DependencyProviderType
 from di.api.scopes import Scope
-from di.api.solved import SolvedDependent
-from di.container import BindHook, ContainerState
 
-T = TypeVar("T")
+DependencyType = TypeVar("DependencyType")
 
 
 class DiBuilder:
     def bind(self, hook: BindHook) -> ContextManager[None]:
         raise NotImplementedError
 
-    def enter_scope(self, scope: Scope, state: ContainerState | None = None) -> FusedContextManager[ContainerState]:
+    def enter_scope(self, scope: Scope, state: ScopeState | None = None) -> FusedContextManager[ScopeState]:
         raise NotImplementedError
 
     async def execute(
-        self, call: DependencyProviderType[T], scope: Scope,
-        *, state: ContainerState, values: Mapping[DependencyProvider, Any] | None = None,
-    ) -> T:
+        self, call: DependencyProviderType[DependencyType], scope: Scope,
+        *, state: ScopeState, values: Mapping[DependencyProvider, Any] | None = None,
+    ) -> DependencyType:
         raise NotImplementedError
 
-    def get_solved(self, call: DependencyProviderType[T], scope: Scope) -> SolvedDependent[T]:
+    def solve(self, call: DependencyProviderType[DependencyType], scope: Scope) -> SolvedDependent[DependencyType]:
         raise NotImplementedError
