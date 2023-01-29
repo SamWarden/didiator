@@ -18,10 +18,11 @@ from sqlalchemy.orm import declarative_base, Mapped, mapped_column, sessionmaker
 from didiator import Command, CommandHandler, Event, EventObserverImpl, Mediator, Query, QueryDispatcherImpl
 from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.handlers.event import EventHandler
+from didiator.interface.utils.di_builder import DiBuilder
 from didiator.mediator import MediatorImpl
 from didiator.middlewares.di import DiMiddleware
 from didiator.middlewares.logging import LoggingMiddleware
-from didiator.utils.di_builder import DiBuilder
+from didiator.utils.di_builder import DiBuilderImpl
 
 logger = logging.getLogger(__name__)
 
@@ -197,11 +198,11 @@ def build_mediator(di_builder: DiBuilder) -> Mediator:
     return mediator
 
 
-def setup_di_builder() -> DiBuilder:
+def setup_di_builder() -> DiBuilderImpl:
     di_container = Container()
     di_executor = AsyncExecutor()
     di_scopes = ("app", "tg_update",)
-    di_builder = DiBuilder(di_container, di_executor, di_scopes=di_scopes)
+    di_builder = DiBuilderImpl(di_container, di_executor, di_scopes=di_scopes)
 
     di_builder.bind(bind_by_type(Dependent(lambda *args: di_builder, scope="app"), DiBuilder))
     di_builder.bind(bind_by_type(Dependent(build_config, scope="app"), Config))

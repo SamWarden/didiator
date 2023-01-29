@@ -17,7 +17,7 @@ Didiator is available on pypi: https://pypi.org/project/didiator
 
     pip install -U "didiator[di]"
 
-It will install ``didiator`` with its optional DI dependency that is necessary to use ``DiMiddleware`` and ``DiBuilder``
+It will install ``didiator`` with its optional DI dependency that is necessary to use ``DiMiddleware`` and ``DiBuilderImpl``
 
 Examples
 ========
@@ -59,7 +59,7 @@ You can use functions as handlers
 Create DiBuilder
 ~~~~~~~~~~~~~~~~
 
-``DiBuilder`` is a facade for Container from DI with caching of `solving <https://www.adriangb.com/di/0.73.0/solving/>`_
+``DiBuilderImpl`` is a facade for Container from DI with caching of `solving <https://www.adriangb.com/di/0.73.0/solving/>`_
 
 ``di_scopes`` is a sequence with the order of `scopes <https://www.adriangb.com/di/0.73.0/scopes/>`_
 
@@ -68,7 +68,7 @@ Create DiBuilder
 .. code-block:: python
 
     di_scopes = ("request",)
-    di_builder = DiBuilder(Container(), AsyncExecutor(), di_scopes)
+    di_builder = DiBuilderImpl(Container(), AsyncExecutor(), di_scopes)
     di_builder.bind(bind_by_type(Dependent(UserRepoImpl, scope="request"), UserRepo))
 
 Create Mediator

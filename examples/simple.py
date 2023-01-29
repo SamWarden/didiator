@@ -9,10 +9,11 @@ from di.executors import AsyncExecutor
 
 from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherImpl
 from didiator.dispatchers.command import CommandDispatcherImpl
+from didiator.interface.utils.di_builder import DiBuilder
 from didiator.mediator import MediatorImpl
 from didiator.middlewares.di import DiMiddleware
 from didiator.middlewares.logging import LoggingMiddleware
-from didiator.utils.di_builder import DiBuilder
+from didiator.utils.di_builder import DiBuilderImpl
 
 logger = logging.getLogger(__name__)
 
@@ -91,9 +92,9 @@ def build_mediator(di_builder: DiBuilder) -> Mediator:
     return mediator
 
 
-def setup_di_builder() -> DiBuilder:
+def setup_di_builder() -> DiBuilderImpl:
     di_scopes = ("app", "request",)
-    di_builder = DiBuilder(Container(), AsyncExecutor(), di_scopes=di_scopes)
+    di_builder = DiBuilderImpl(Container(), AsyncExecutor(), di_scopes=di_scopes)
     di_builder.bind(bind_by_type(Dependent(lambda *args: di_builder, scope="app"), DiBuilder))
     di_builder.bind(bind_by_type(Dependent(build_mediator, scope="app"), Mediator))
     di_builder.bind(bind_by_type(Dependent(UserRepoImpl, scope="request"), UserRepo))
