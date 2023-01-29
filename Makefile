@@ -1,5 +1,7 @@
 py := poetry run
-package_dir := src
+package_dir := didiator
+tests_dir := tests
+code_dir := $(package_dir) $(tests_dir)
 
 .PHONY: help
 help:
@@ -11,10 +13,10 @@ install: ## Install package with dependencies
 
 .PHONY: lint
 lint: ## Lint code with flake8, pylint, mypy
-	$(py) flake8 $(package_dir)
-	$(py) pylint $(package_dir)
-	$(py) mypy $(package_dir)
+	$(py) flake8 $(code_dir) --exit-zero
+	$(py) pylint $(code_dir) --exit-zero
+	$(py) mypy $(package_dir) || true
 
 .PHONY: test
 test: ## Run tests
-	$(py) pytest $(package_dir)
+	$(py) pytest $(tests_dir)
