@@ -201,7 +201,7 @@ def build_mediator(di_builder: DiBuilder) -> Mediator:
 def setup_di_builder() -> DiBuilderImpl:
     di_container = Container()
     di_executor = AsyncExecutor()
-    di_scopes = ("app", "tg_update",)
+    di_scopes = ["app", "tg_update"]
     di_builder = DiBuilderImpl(di_container, di_executor, di_scopes=di_scopes)
 
     di_builder.bind(bind_by_type(Dependent(lambda *args: di_builder, scope="app"), DiBuilder))

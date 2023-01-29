@@ -140,10 +140,10 @@ class TestDiMiddleware:
         di_container.bind(bind_by_type(Dependent(SessionMock, scope="mediator"), Session))
 
         command_dispatcher = CommandDispatcherImpl(middlewares=(
-            DiMiddleware(DiBuilderImpl(di_container, di_executor, ("mediator", "mediator_request")), cls_scope="mediator"),
+            DiMiddleware(DiBuilderImpl(di_container, di_executor, ["mediator", "mediator_request"]), cls_scope="mediator"),
         ))
         query_dispatcher = QueryDispatcherImpl(middlewares=(
-            DiMiddleware(DiBuilderImpl(di_container, di_executor, ("mediator", "mediator_request")), cls_scope="mediator"),
+            DiMiddleware(DiBuilderImpl(di_container, di_executor, ["mediator", "mediator_request"]), cls_scope="mediator"),
         ))
 
         command_dispatcher.register_handler(CreateUser, CreateUserHandler)

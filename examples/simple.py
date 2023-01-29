@@ -93,7 +93,7 @@ def build_mediator(di_builder: DiBuilder) -> Mediator:
 
 
 def setup_di_builder() -> DiBuilderImpl:
-    di_scopes = ("app", "request",)
+    di_scopes = ["app", "request"]
     di_builder = DiBuilderImpl(Container(), AsyncExecutor(), di_scopes=di_scopes)
     di_builder.bind(bind_by_type(Dependent(lambda *args: di_builder, scope="app"), DiBuilder))
     di_builder.bind(bind_by_type(Dependent(build_mediator, scope="app"), Mediator))

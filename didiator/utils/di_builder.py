@@ -1,4 +1,4 @@
-from collections.abc import Sequence, Mapping
+from collections.abc import Mapping
 from typing import Any, ContextManager, TypeVar
 
 from di import Container, ScopeState, SolvedDependent
@@ -16,10 +16,12 @@ DependencyType = TypeVar("DependencyType")
 
 class DiBuilderImpl(DiBuilder):
     def __init__(
-        self, di_container: Container, di_executor: SupportsAsyncExecutor, di_scopes: Sequence[Scope] = (),
+        self, di_container: Container, di_executor: SupportsAsyncExecutor, di_scopes: list[Scope] | None = None,
     ) -> None:
         self._di_container = di_container
         self._di_executor = di_executor
+        if di_scopes is None:
+            di_scopes = []
         self.di_scopes = di_scopes
 
         self._solved_dependencies: dict[Scope, dict[DependencyProviderType[Any], SolvedDependent[Any]]] = {}
