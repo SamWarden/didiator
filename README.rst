@@ -17,7 +17,7 @@ Didiator is available on pypi: https://pypi.org/project/didiator
 
     pip install -U "didiator[di]"
 
-It will install ``didiator`` with its optional DI dependency that is necessary to use ``DiMiddleware`` and ``DiBuilder``
+It will install ``didiator`` with its optional DI dependency that is necessary to use ``DiMiddleware`` and ``DiBuilderImpl``
 
 Examples
 ========
@@ -59,16 +59,16 @@ You can use functions as handlers
 Create DiBuilder
 ~~~~~~~~~~~~~~~~
 
-``DiBuilder`` is a facade for Container from DI with caching of `solving <https://www.adriangb.com/di/0.73.0/solving/>`_
+``DiBuilderImpl`` is a facade for Container from DI with caching of `solving <https://www.adriangb.com/di/0.73.0/solving/>`_
 
-``di_scopes`` is a sequence with the order of `scopes <https://www.adriangb.com/di/0.73.0/scopes/>`_
+``di_scopes`` is a list with the order of `scopes <https://www.adriangb.com/di/0.73.0/scopes/>`_
 
 ``di_builder.bind(...)`` will `bind <https://www.adriangb.com/di/0.73.0/binds/>`_ ``UserRepoImpl`` type to ``UserRepo`` protocol
 
 .. code-block:: python
 
-    di_scopes = ("request",)
-    di_builder = DiBuilder(Container(), AsyncExecutor(), di_scopes)
+    di_scopes = ["request"]
+    di_builder = DiBuilderImpl(Container(), AsyncExecutor(), di_scopes)
     di_builder.bind(bind_by_type(Dependent(UserRepoImpl, scope="request"), UserRepo))
 
 Create Mediator
@@ -80,7 +80,7 @@ Create dispatchers with their middlewares and use them to initialize the ``Media
 
 .. code-block:: python
 
-    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, cls_scope="request"))
+    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, scopes=DiScopes("request")))
     command_dispatcher = CommandDispatcherImpl(middlewares=middlewares)
     query_dispatcher = QueryDispatcherImpl(middlewares=middlewares)
 
@@ -145,7 +145,7 @@ Create EventObserver and use it for Mediator
 
 .. code-block:: python
 
-    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, cls_scope="request"))
+    middlewares = (LoggingMiddleware(), DiMiddleware(di_builder, scopes=DiScopes("request")))
     event_observer = EventObserver(middlewares=middlewares)
 
     mediator = MediatorImpl(command_dispatcher, query_dispatcher, event_observer)
@@ -160,7 +160,6 @@ You can register multiple event handlers for one event
     mediator.register_event_handler(UserCreated, on_user_created1)
     mediator.register_event_handler(UserCreated, on_user_created2)
 
-
 Publish event
 -------------
 
@@ -168,11 +167,11 @@ Event handlers will be executed sequentially
 
 .. code-block:: python
 
-    mediator.publish(UserCreated(1, "Jon"))
+    await mediator.publish(UserCreated(1, "Jon"))
     # User created1: id=1,  username="Jon"
     # User created2: id=1,  username="Jon"
 
-    mediator.publish([UserCreated(2, "Sam"), UserCreated(3, "Nick")])
+    await mediator.publish([UserCreated(2, "Sam"), UserCreated(3, "Nick")])
     # User created1: id=2,  username="Sam"
     # User created2: id=2,  username="Sam"
     # User created1: id=3,  username="Nick"

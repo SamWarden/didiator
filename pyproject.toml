@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "didiator"
-version = "0.2.0"
+version = "0.3.0"
 description = "A library that implements the Mediator pattern and uses DI library"
 authors = [
     "SamWarden <SamWardenSad@gmail.com>",
@@ -36,27 +36,31 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.10,<4"
-di = {version = "^0.73.0", extras = ["anyio"], optional = true}
+di = {version = "^0.75.0", extras = ["anyio"], optional = true}
 
 [tool.poetry.extras]
 di = ["di"]
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
 pytest = "^7.2.0"
-mypy = "^0.991"
 pytest-asyncio = "^0.20.3"
+
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
 pylint = "^2.15.9"
+mypy = "^0.991"
+flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.pylint]
-disable = [
-    "C0114",  # Missing module docstrings
-    "C0115",  # Missing class docstrings
-    "C0116",  # Missing function docstrings
-    "R0903",  # Too few public methods
-
-]
-max-line-length = 120

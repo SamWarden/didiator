@@ -48,14 +48,18 @@ class MediatorImpl(Mediator):
 
     def bind(self, **extra_data: Any) -> "MediatorImpl":
         return MediatorImpl(
-            self._command_dispatcher, self._query_dispatcher, self._event_observer,
+            self._command_dispatcher.copy(),
+            self._query_dispatcher.copy(),
+            self._event_observer.copy(),
             extra_data=self._extra_data | extra_data,
         )
 
     def unbind(self, *keys: str) -> "MediatorImpl":
         extra_data = {key: val for key, val in self._extra_data.items() if key not in keys}
         return MediatorImpl(
-            self._command_dispatcher, self._query_dispatcher, self._event_observer,
+            self._command_dispatcher.copy(),
+            self._query_dispatcher.copy(),
+            self._event_observer.copy(),
             extra_data=extra_data,
         )
 

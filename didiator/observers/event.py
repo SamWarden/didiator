@@ -7,14 +7,21 @@ from didiator.interface.entities.event import Event
 from didiator.interface.handlers.event import EventHandlerType
 from didiator.middlewares.base import MiddlewareType, wrap_middleware
 
+Self = TypeVar("Self", bound="EventObserverImpl")
 E = TypeVar("E", bound=Event)
 Middlewares = Sequence[MiddlewareType[Event, Any]]
 
 
 class EventObserverImpl(EventObserver):
-    def __init__(self, middlewares: Middlewares = ()) -> None:
-        self._listeners: list[Listener[Event]] = []
+    def __init__(
+        self, middlewares: Middlewares = (),
+        *, listeners: list[Listener[Event]] | None = None,
+    ) -> None:
         self._middlewares: Middlewares = middlewares
+
+        if listeners is None:
+            listeners = []
+        self._listeners = listeners
 
     @property
     def listeners(self) -> tuple[Listener[Event], ...]:
@@ -23,6 +30,9 @@ class EventObserverImpl(EventObserver):
     @property
     def middlewares(self) -> tuple[MiddlewareType[Event, Any], ...]:
         return tuple(self._middlewares)
+
+    def copy(self: Self) -> Self:
+        return self.__class__(self._middlewares, listeners=self._listeners)
 
     def register_listener(self, listener: Listener[Event]) -> None:
         self._listeners.append(listener)

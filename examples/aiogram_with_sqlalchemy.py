@@ -8,20 +8,21 @@ import logging
 import aiogram
 import aiogram.filters
 import aiogram.types as tg
-from di.container import bind_by_type, Container, ContainerState
+from di import bind_by_type, Container, ScopeState
 from di.dependent import Dependent
 from di.executors import AsyncExecutor
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import declarative_base, Mapped, mapped_column, sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncEngine, AsyncSession, create_async_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from didiator import Command, CommandHandler, Event, EventObserverImpl, Mediator, Query, QueryDispatcherImpl
 from didiator.dispatchers.command import CommandDispatcherImpl
 from didiator.interface.handlers.event import EventHandler
+from didiator.interface.utils.di_builder import DiBuilder
 from didiator.mediator import MediatorImpl
-from didiator.middlewares.di import DiMiddleware
+from didiator.middlewares.di import DiMiddleware, DiScopes
 from didiator.middlewares.logging import LoggingMiddleware
-from didiator.utils.di_builder import DiBuilder
+from didiator.utils.di_builder import DiBuilderImpl
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,6 @@ logger = logging.getLogger(__name__)
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN", "")
 
 # SQLAlchemy declaration
-BaseModel = declarative_base()
 
 
 # User entity
@@ -57,6 +57,10 @@ class UserRepo(Protocol):
         ...
 
 
+class TgUpdate:
+    update_id: int
+
+
 # User created event and its handler
 @dataclass(frozen=True)
 class UserCreated(Event):
@@ -65,12 +69,14 @@ class UserCreated(Event):
 
 
 class UserCreatedHandler(EventHandler[UserCreated]):
-    def __init__(self, bot: aiogram.Bot):
+    def __init__(self, bot: aiogram.Bot, update: TgUpdate):
         self._bot = bot
+        self._update = update
 
     async def __call__(self, event: UserCreated) -> None:
         logger.info("User registered, %s", self._bot)
-        await self._bot.send_message(event.user_id, f"{event.username}, you're registered")
+        await self._bot.send_message(
+            event.user_id, f"{event.username}, you're registered by update: {self._update.update_id}")
 
 
 # Create user command and its handler
@@ -112,6 +118,10 @@ class GetUserById(Query[User]):
 async def handle_get_user_by_id(query: GetUserById, user_repo: UserRepo) -> User:
     user = await user_repo.get_user_by_id(query.user_id)
     return user
+
+
+class BaseModel(DeclarativeBase):
+    pass
 
 
 class UserModel(BaseModel):
@@ -162,12 +172,12 @@ async def build_sa_engine(config: Config) -> AsyncGenerator[AsyncEngine, None]:
     await engine.dispose()
 
 
-def build_sa_pool(engine: AsyncEngine) -> sessionmaker:
-    return sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False, autoflush=False)
+def build_sa_session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+    return async_sessionmaker(bind=engine, expire_on_commit=False, autoflush=False)
 
 
-async def build_sa_session(pool: sessionmaker) -> AsyncGenerator[AsyncSession, None]:
-    async with pool() as session:
+async def build_sa_session(session_factory: async_sessionmaker[AsyncSession]) -> AsyncGenerator[AsyncSession, None]:
+    async with session_factory() as session:
         yield session
 
 
@@ -184,7 +194,7 @@ def build_tg_dispatcher() -> aiogram.Dispatcher:
 
 
 def build_mediator(di_builder: DiBuilder) -> Mediator:
-    middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, cls_scope="tg_update"))
+    middlewares = (LoggingMiddleware(level=logging.INFO), DiMiddleware(di_builder, scopes=DiScopes("tg_update")))
     command_dispatcher = CommandDispatcherImpl(middlewares=middlewares)
     query_dispatcher = QueryDispatcherImpl(middlewares=middlewares)
     event_observer = EventObserverImpl(middlewares=middlewares)
@@ -197,33 +207,26 @@ def build_mediator(di_builder: DiBuilder) -> Mediator:
     return mediator
 
 
-def setup_di_builder() -> DiBuilder:
+def setup_di_builder() -> DiBuilderImpl:
     di_container = Container()
     di_executor = AsyncExecutor()
-    di_scopes = ("app", "tg_update",)
-    di_builder = DiBuilder(di_container, di_executor, di_scopes=di_scopes)
+    di_scopes = ["app", "tg_update"]
+    di_builder = DiBuilderImpl(di_container, di_executor, di_scopes=di_scopes)
 
     di_builder.bind(bind_by_type(Dependent(lambda *args: di_builder, scope="app"), DiBuilder))
     di_builder.bind(bind_by_type(Dependent(build_config, scope="app"), Config))
-    di_builder.bind(bind_by_type(Dependent(build_mediator, scope="app"), Mediator))
     di_builder.bind(bind_by_type(Dependent(build_tg_bot, scope="app"), aiogram.Bot))
     di_builder.bind(bind_by_type(Dependent(build_sa_engine, scope="app"), AsyncEngine))
-    di_builder.bind(bind_by_type(Dependent(build_sa_pool, scope="app"), sessionmaker))
+    di_builder.bind(bind_by_type(Dependent(build_sa_session_factory, scope="app"), async_sessionmaker[AsyncSession]))
     di_builder.bind(bind_by_type(Dependent(build_sa_session, scope="tg_update"), AsyncSession))
     di_builder.bind(bind_by_type(Dependent(build_repo, scope="tg_update"), UserRepo))
     return di_builder
 
 
-def create_mediator_builder(mediator: Mediator) -> Callable[[ContainerState], Mediator]:
-    def _build_mediator(di_state: ContainerState) -> Mediator:
-        return mediator.bind(di_state=di_state)
-    return _build_mediator
-
-
 class MediatorMiddleware(aiogram.BaseMiddleware):
     def __init__(
-        self, mediator: Mediator, di_builder: DiBuilder, di_state: ContainerState | None = None,
-    ):
+        self, mediator: Mediator, di_builder: DiBuilder, di_state: ScopeState | None = None,
+    ) -> None:
         self._mediator = mediator
         self._di_builder = di_builder
         self._di_state = di_state
@@ -235,7 +238,10 @@ class MediatorMiddleware(aiogram.BaseMiddleware):
         data: dict[str, Any],
     ) -> None:
         async with self._di_builder.enter_scope("tg_update", self._di_state) as di_state:
-            mediator = self._mediator.bind(di_state=di_state)
+            copied_di_builder = self._di_builder.copy()
+            di_values = {TgUpdate: event}
+            mediator = self._mediator.bind(di_state=di_state, di_builder=copied_di_builder, di_values=di_values)
+            di_values[Mediator] = mediator
             data["mediator"] = mediator
             result = await handler(event, data)
             del data["mediator"]
@@ -266,8 +272,7 @@ async def main() -> None:
     di_builder = setup_di_builder()
 
     async with di_builder.enter_scope("app") as di_state:
-        mediator = await di_builder.execute(Mediator, "app", state=di_state)
-        di_builder.bind(bind_by_type(Dependent(create_mediator_builder(mediator), scope="tg_update"), Mediator))
+        mediator = await di_builder.execute(build_mediator, "app", state=di_state)
 
         dp = await di_builder.execute(aiogram.Dispatcher, "app", state=di_state)
         dp.update.outer_middleware(MediatorMiddleware(mediator, di_builder, di_state))
