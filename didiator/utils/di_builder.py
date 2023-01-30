@@ -53,7 +53,7 @@ class DiBuilderImpl(DiBuilder):
 
     def copy(self) -> "DiBuilderImpl":
         di_container = Container()
-        di_container._bind_hooks = self._di_container._bind_hooks  # noqa
+        di_container._bind_hooks = self._di_container._bind_hooks.copy()  # noqa
         return DiBuilderImpl(
             di_container, self._di_executor, self.di_scopes, solved_dependencies=self._solved_dependencies,
         )
