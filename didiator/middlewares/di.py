@@ -77,7 +77,7 @@ class DiMiddleware(Middleware):
         async with di_builder.enter_scope(self._di_scopes.func_handler, di_state) as scoped_di_state:
             handler = await di_builder.execute(
                 handler, self._di_scopes.cls_handler, state=scoped_di_state, values={
-                    type(request): request, ScopeState: di_state,
+                    type(request): request,
                 } | di_values,
             )
             return await handler(request, *args, **kwargs)
@@ -89,6 +89,6 @@ class DiMiddleware(Middleware):
         async with di_builder.enter_scope(self._di_scopes.func_handler, di_state) as scoped_di_state:
             return await di_builder.execute(
                 handler, self._di_scopes.func_handler, state=scoped_di_state, values={
-                    type(request): request, ScopeState: di_state,
+                    type(request): request,
                 } | di_values,
             )

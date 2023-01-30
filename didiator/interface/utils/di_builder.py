@@ -27,3 +27,6 @@ class DiBuilder(Protocol):
 
     def solve(self, call: DependencyProviderType[DependencyType], scope: Scope) -> SolvedDependent[DependencyType]:
         raise NotImplementedError
+
+    def copy(self) -> "DiBuilder":
+        raise NotImplementedError

@@ -17,6 +17,7 @@ DependencyType = TypeVar("DependencyType")
 class DiBuilderImpl(DiBuilder):
     def __init__(
         self, di_container: Container, di_executor: SupportsAsyncExecutor, di_scopes: list[Scope] | None = None,
+        *, solved_dependencies: dict[Scope, dict[DependencyProviderType[Any], SolvedDependent[Any]]] | None = None,
     ) -> None:
         self._di_container = di_container
         self._di_executor = di_executor
@@ -24,7 +25,9 @@ class DiBuilderImpl(DiBuilder):
             di_scopes = []
         self.di_scopes = di_scopes
 
-        self._solved_dependencies: dict[Scope, dict[DependencyProviderType[Any], SolvedDependent[Any]]] = {}
+        if solved_dependencies is None:
+            solved_dependencies = {}
+        self._solved_dependencies = solved_dependencies
 
     def bind(self, hook: BindHook) -> ContextManager[None]:
         return self._di_container.bind(hook)
@@ -47,3 +50,10 @@ class DiBuilderImpl(DiBuilder):
             solved_dependency = self._di_container.solve(Dependent(call, scope=scope), scopes=self.di_scopes)
             solved_scope_dependencies[call] = solved_dependency
         return solved_dependency
+
+    def copy(self) -> "DiBuilderImpl":
+        di_container = Container()
+        di_container._bind_hooks = self._di_container._bind_hooks  # noqa
+        return DiBuilderImpl(
+            di_container, self._di_executor, self.di_scopes, solved_dependencies=self._solved_dependencies,
+        )
