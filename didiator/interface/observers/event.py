@@ -5,6 +5,7 @@ from didiator.interface.entities.event import Event
 from didiator.interface.handlers.event import EventHandlerType
 from didiator.middlewares.base import MiddlewareType
 
+Self = TypeVar("Self", bound="EventObserver")
 E = TypeVar("E", bound=Event)
 
 
@@ -32,6 +33,9 @@ class EventObserver(Protocol):
 
     @property
     def middlewares(self) -> tuple[MiddlewareType[Event, Any], ...]:
+        raise NotImplementedError
+
+    def copy(self: Self) -> Self:
         raise NotImplementedError
 
     def register_listener(self, listener: Listener[Any]) -> None:
