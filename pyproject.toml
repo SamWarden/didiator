@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "didiator"
-version = "0.2.0"
+version = "0.3.0"
 description = "A library that implements the Mediator pattern and uses DI library"
 authors = [
     "SamWarden <SamWardenSad@gmail.com>",
