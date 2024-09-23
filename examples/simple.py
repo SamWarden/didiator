@@ -1,19 +1,13 @@
 import asyncio
+import logging
 from dataclasses import dataclass
 from typing import Protocol
-import logging
 
-from di import bind_by_type, Container
-from di.dependent import Dependent
-from di.executors import AsyncExecutor
+from dishka import AsyncContainer, make_async_container, provide, Provider, Scope
 
-from didiator import Command, CommandHandler, Mediator, Query, QueryDispatcherImpl
-from didiator.dispatchers.command import CommandDispatcherImpl
-from didiator.interface.utils.di_builder import DiBuilder
+from didiator import Handler, Mediator, Request
+from didiator.ioc.dishka import DishkaIoc
 from didiator.mediator import MediatorImpl
-from didiator.middlewares.di import DiMiddleware, DiScopes
-from didiator.middlewares.logging import LoggingMiddleware
-from didiator.utils.di_builder import DiBuilderImpl
 
 logger = logging.getLogger(__name__)
 
@@ -38,13 +32,13 @@ class UserRepo(Protocol):
 
 # Create user command and its handler
 @dataclass(frozen=True)
-class CreateUser(Command[int]):
+class CreateUser(Request[int]):
     user_id: int
     username: str
 
 
-class CreateUserHandler(CommandHandler[CreateUser, int]):
-    def __init__(self, user_repo: UserRepo):
+class CreateUserHandler(Handler[CreateUser, int]):
+    def __init__(self, user_repo: UserRepo) -> None:
         self._user_repo = user_repo
 
     async def __call__(self, command: CreateUser) -> int:
@@ -55,18 +49,18 @@ class CreateUserHandler(CommandHandler[CreateUser, int]):
 
 
 # Get user query and its handler
-@dataclass(frozen=True)
-class GetUserById(Query[User]):
-    user_id: int
-
-
-async def handle_get_user_by_id(query: GetUserById, user_repo: UserRepo) -> User:
-    user = await user_repo.get_user_by_id(query.user_id)
-    return user
+# @dataclass(frozen=True)
+# class GetUserById(Query[User]):
+#     user_id: int
+#
+#
+# async def handle_get_user_by_id(query: GetUserById, user_repo: UserRepo) -> User:
+#     user = await user_repo.get_user_by_id(query.user_id)
+#     return user
 
 
 class UserRepoImpl(UserRepo):
-    def __init__(self):
+    def __init__(self) -> None:
         self._db_mock: dict[int, User] = {}
 
     async def add_user(self, user: User) -> None:
@@ -81,27 +75,22 @@ class UserRepoImpl(UserRepo):
         ...
 
 
-def build_mediator(di_builder: DiBuilder) -> Mediator:
-    dispatchers_middlewares = (
-        LoggingMiddleware(level=logging.INFO),
-        DiMiddleware(di_builder, scopes=DiScopes("request")),
-    )
-    command_dispatcher = CommandDispatcherImpl(middlewares=dispatchers_middlewares)
-    query_dispatcher = QueryDispatcherImpl(middlewares=dispatchers_middlewares)
+def build_mediator(container: AsyncContainer) -> Mediator:
+    mediator = MediatorImpl(ioc=DishkaIoc(container), middlewares=[])
 
-    mediator = MediatorImpl(command_dispatcher, query_dispatcher)
-    mediator.register_command_handler(CreateUser, CreateUserHandler)
-    mediator.register_query_handler(GetUserById, handle_get_user_by_id)
+    mediator.register_request_handler(CreateUser, CreateUserHandler)
+    # mediator.register_request_handler(GetUserById, handle_get_user_by_id)
+
     return mediator
 
 
-def setup_di_builder() -> DiBuilderImpl:
-    di_scopes = ["app", "request"]
-    di_builder = DiBuilderImpl(Container(), AsyncExecutor(), di_scopes=di_scopes)
-    di_builder.bind(bind_by_type(Dependent(lambda *args: di_builder, scope="app"), DiBuilder))
-    di_builder.bind(bind_by_type(Dependent(build_mediator, scope="app"), Mediator))
-    di_builder.bind(bind_by_type(Dependent(UserRepoImpl, scope="request"), UserRepo))
-    return di_builder
+class MainProvider(Provider):
+    # get_user_by_id = provide(GetUserByIdHandler, scope=Scope.REQUEST)
+    create_user_handler = provide(CreateUserHandler, scope=Scope.REQUEST)
+
+    @provide(scope=Scope.REQUEST)
+    def user_repo(self) -> UserRepo:
+        return UserRepoImpl()
 
 
 async def main() -> None:
@@ -109,23 +98,19 @@ async def main() -> None:
         level=logging.INFO,
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     )
-    di_builder = setup_di_builder()
+    # di_builder = setup_di_builder()
+    container = make_async_container(MainProvider())
+    mediator = build_mediator(container)
 
-    async with di_builder.enter_scope("app") as di_state:
-        mediator = await di_builder.execute(Mediator, "app", state=di_state)
+    # It will call CreateUserHandler(UserRepoImpl()).__call__(command)
+    # UserRepoImpl() created and injected automatically
+    user_id = await mediator.send(CreateUser(1, "Jon"))
+    logger.info(f"Created a user with id: {user_id}")
 
-        async with di_builder.enter_scope("request", di_state) as request_di_state:
-            scoped_mediator = mediator.bind(di_state=request_di_state)
-
-            # It will call CreateUserHandler(UserRepoImpl()).__call__(command)
-            # UserRepoImpl() created and injected automatically
-            user_id = await scoped_mediator.send(CreateUser(1, "Jon"))
-            logger.info(f"Created a user with id: {user_id}")
-
-            # It will call handle_get_user_by_id(query, user_repo)
-            # UserRepoImpl created earlier will be reused in this scope
-            user = await scoped_mediator.query(GetUserById(user_id))
-            logger.info(f"User: {user}")
+    # It will call handle_get_user_by_id(query, user_repo)
+    # UserRepoImpl created earlier will be reused in this scope
+    # user = await mediator.send(GetUserById(user_id))
+    # logger.info(f"User: {user}")
 
 
 if __name__ == "__main__":

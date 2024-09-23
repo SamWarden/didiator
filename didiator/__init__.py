@@ -1,30 +1,18 @@
-from .dispatchers import CommandDispatcherImpl, QueryDispatcherImpl
-from .interface import CommandDispatcher, EventHandler, EventObserver, QueryDispatcher
-from .observers import EventObserverImpl
-from .interface.entities import Command, Query, Event
-from .interface.handlers import CommandHandler, QueryHandler
-from .interface.mediator import Mediator, CommandMediator, QueryMediator, EventMediator
+from .interface.entities import Event, Request
+from .interface.handlers import EventHandler, Handler
+from .interface.ioc import Ioc
+from .interface.mediator import Mediator
 from .mediator import MediatorImpl
 
-__version__ = "0.3.1"
+__version__ = "0.4.0"
 
 __all__ = (
     "__version__",
     "MediatorImpl",
     "Mediator",
-    "CommandMediator",
-    "QueryMediator",
-    "EventMediator",
-    "Command",
-    "CommandHandler",
-    "CommandDispatcher",
-    "CommandDispatcherImpl",
-    "Query",
-    "QueryHandler",
-    "QueryDispatcher",
-    "QueryDispatcherImpl",
+    "Ioc",
+    "Request",
     "Event",
+    "Handler",
     "EventHandler",
-    "EventObserver",
-    "EventObserverImpl",
 )
